@@ -1,9 +1,9 @@
 import { Button } from "@chakra-ui/react";
-import { useVibe } from "../../hooks/useVibe";
+import { useTimer } from "../../hooks/useTimer";
 
 // eslint-disable-next-line react/prop-types
 export default function ActionButton({ children, ...props }) {
-  const { color } = useVibe();
+  const { color } = useTimer();
 
   return (
     <Button

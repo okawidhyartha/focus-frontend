@@ -1,11 +1,11 @@
 import TimerPage from "./pages/timer";
-import VibeProvider from "./providers/VibeProvider";
+import TimerProvider from "./providers/TimerProvider";
 
 function App() {
   return (
-    <VibeProvider>
+    <TimerProvider>
       <TimerPage />
-    </VibeProvider>
+    </TimerProvider>
   );
 }
 
