@@ -1,5 +1,6 @@
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { TIMER_OPTIONS } from "../helpers/constants";
+import { focusMusics } from "../services/focus-music";
 
 export const TimerContext = createContext(null);
 
@@ -9,6 +10,11 @@ export default function TimerProvider({ children }) {
   const [color, setColor] = useState(fisrtOption.color);
   const [selectedOption, setSelectedOption] = useState(fisrtOption.value);
   const [playing, setPlaying] = useState(false);
+  const [focusMusic, setFocusMusic] = useState("none");
+  const [focusBackground, setFocusBackground] = useState(null);
+  const [focusBackgroundPreview, setFocusBackgroundPreview] = useState(null);
+  const [isVisibleFocusMusicSetting, setIsVisibleFocusMusicSetting] =
+    useState(false);
 
   const getNextOption = useCallback(() => {
     const optionIndex = TIMER_OPTIONS.findIndex(
@@ -20,6 +26,15 @@ export default function TimerProvider({ children }) {
     return nextOptionData;
   }, [selectedOption]);
 
+  useEffect(() => {
+    if (focusMusic) {
+      const musicData = focusMusics.find((music) => music.value === focusMusic);
+      setFocusBackground(musicData.background);
+    } else {
+      setFocusBackground(null);
+    }
+  }, [focusMusic]);
+
   return (
     <TimerContext.Provider
       value={{
@@ -29,7 +44,15 @@ export default function TimerProvider({ children }) {
         setSelectedOption,
         playing,
         setPlaying,
-        getNextOption
+        getNextOption,
+        focusMusic,
+        setFocusMusic,
+        focusBackground,
+        setFocusBackground,
+        isVisibleFocusMusicSetting,
+        setIsVisibleFocusMusicSetting,
+        focusBackgroundPreview,
+        setFocusBackgroundPreview,
       }}
     >
       {children}
