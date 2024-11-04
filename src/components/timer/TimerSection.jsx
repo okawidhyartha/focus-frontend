@@ -4,11 +4,13 @@ import TimerCount from "./TimerCount";
 import TimerActions from "./TimerActions";
 import TimerSettings from "./TimerSettings";
 import FocusMusicSlider from "./FocusMusicSlider";
-import TimerAudio from "./TimerAudio";
 import { useTimer } from "../../hooks/useTimer";
+import FocusMusicPlayer from "./FocusMusicPlayer";
+import AlarmSlider from "./AlarmSlider";
+import AlarmPlayer from "./AlarmPlayer";
 
 export default function TimerSection() {
-  const { isVisibleFocusMusicSetting } = useTimer();
+  const { isVisibleFocusMusicSetting, isVisibleAlarmSetting } = useTimer();
   return (
     <>
       <VStack
@@ -23,7 +25,9 @@ export default function TimerSection() {
         <TimerSettings />
       </VStack>
       {isVisibleFocusMusicSetting && <FocusMusicSlider />}
-      <TimerAudio />
+      {isVisibleAlarmSetting && <AlarmSlider />}
+      <FocusMusicPlayer />
+      <AlarmPlayer />
     </>
   );
 }

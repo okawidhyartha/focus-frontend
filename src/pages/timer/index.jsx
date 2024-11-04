@@ -23,7 +23,7 @@ export default function TimerPage() {
   return (
     <Box
       backgroundColor={
-        (focusBackground && playing && selectedOption) || focusBackgroundPreview
+        (focusBackground && playing && selectedOption === "focus-time") || focusBackgroundPreview
           ? "black"
           : color
       }

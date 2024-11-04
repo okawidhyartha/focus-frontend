@@ -1,5 +1,12 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Box, Button, Center, IconButton, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  useToast,
+} from "@chakra-ui/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -10,12 +17,18 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCircleCheck,
+  IconCircleX,
 } from "@tabler/icons-react";
 import { FOCUS_MUSICS } from "../../helpers/constants";
 
 export default function FocusMusicSlider() {
   const toast = useToast();
-  const { focusMusic, setFocusMusic, setFocusBackgroundPreview } = useTimer();
+  const {
+    focusMusic,
+    setFocusMusic,
+    setFocusBackgroundPreview,
+    setIsVisibleFocusMusicSetting,
+  } = useTimer();
   const [previewMusic, setPreviewMusic] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState(focusMusic);
@@ -38,6 +51,11 @@ export default function FocusMusicSlider() {
       isClosable: true,
       position: "top-right",
     });
+    setIsVisibleFocusMusicSetting(false);
+  };
+
+  const handleClose = () => {
+    setIsVisibleFocusMusicSetting(false);
   };
 
   return (
@@ -48,7 +66,7 @@ export default function FocusMusicSlider() {
       position={"relative"}
       mt={4}
     >
-      <Box position={"relative"} mb={2}>
+      <Box position={"relative"} mb={4}>
         <Swiper
           style={{ borderRadius: "10px" }}
           modules={[Navigation]}
@@ -137,14 +155,22 @@ export default function FocusMusicSlider() {
           <IconChevronRight />
         </IconButton>
       </Box>
-      <Button
-        width="fit-content"
-        alignSelf="end"
-        leftIcon={<IconCircleCheck />}
-        onClick={handleApply}
-      >
-        Apply
-      </Button>
+      <HStack alignSelf="end">
+        <Button
+          width="fit-content"
+          leftIcon={<IconCircleX />}
+          onClick={handleClose}
+        >
+          Close
+        </Button>
+        <Button
+          width="fit-content"
+          leftIcon={<IconCircleCheck />}
+          onClick={handleApply}
+        >
+          Apply
+        </Button>
+      </HStack>
     </Box>
   );
 }

@@ -3,7 +3,8 @@ import { useTimer } from "../../hooks/useTimer";
 
 // eslint-disable-next-line react/prop-types
 export default function ActionButton({ children, ...props }) {
-  const { color } = useTimer();
+  const { color, focusBackground, focusBackgroundPreview, playing, selectedOption } =
+    useTimer();
 
   return (
     <Button
@@ -12,7 +13,13 @@ export default function ActionButton({ children, ...props }) {
       height="59px"
       px="36px"
       borderRadius="full"
-      color={color}
+      color={
+        (playing && focusBackground && selectedOption === "focus-time") ||
+        focusBackgroundPreview
+          ? "black"
+          : color
+      }
+      transition="color 1s"
       {...props}
     >
       {children}

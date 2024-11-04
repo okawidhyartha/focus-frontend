@@ -14,8 +14,15 @@ function formatTime(seconds) {
 
 export default function TimerCount() {
   const [timeSeconds, setTimeSeconds] = useState(TIMER_OPTIONS[0].minutes * 60);
-  const { setColor, selectedOption, setSelectedOption, getNextOption, playing, setPlaying } =
-    useTimer();
+  const {
+    setColor,
+    selectedOption,
+    setSelectedOption,
+    getNextOption,
+    playing,
+    setPlaying,
+    setPlayingAlarm
+  } = useTimer();
 
   const intervalRef = useRef(null);
 
@@ -35,13 +42,14 @@ export default function TimerCount() {
         if (prevTime === 0) {
           const nextOptionData = getNextOption();
           setSelectedOption(nextOptionData.value);
+          setPlayingAlarm(true);
           return 0;
         }
 
         return prevTime - 1;
       });
     }, 1000);
-  }, [changeTimer, getNextOption]);
+  }, [getNextOption, setSelectedOption]);
 
   useEffect(() => {
     return () => {
@@ -68,7 +76,7 @@ export default function TimerCount() {
       fontSize="128px"
       fontWeight="bold"
       letterSpacing="-1.7%"
-      color="white"
+      color={"white"}
     >
       {formatTime(timeSeconds)}
     </Text>

@@ -4,7 +4,8 @@ import { IconPlayerSkipForwardFilled } from "@tabler/icons-react";
 import { useTimer } from "../../hooks/useTimer";
 
 export default function TimerActions() {
-  const { playing, setPlaying, getNextOption, setSelectedOption } = useTimer();
+  const { playing, setPlaying, getNextOption, setSelectedOption, setPlayingAlarm } =
+    useTimer();
 
   const handlePlayClick = () => {
     setPlaying(true);
@@ -15,8 +16,10 @@ export default function TimerActions() {
   };
 
   const handleSkipClick = () => {
+    setPlaying(false);
     const nextOptionData = getNextOption();
     setSelectedOption(nextOptionData.value);
+    setPlayingAlarm(true);
   };
 
   return (
