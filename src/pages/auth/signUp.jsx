@@ -14,9 +14,11 @@ import { useTimer } from "../../hooks/useTimer";
 import LogoApp from "../../components/LogoApp";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function SignUpPage() {
   const { color } = useTimer();
+  const { signUp } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const {
@@ -29,20 +31,7 @@ export default function SignUpPage() {
 
   const onSubmit = async (data) => {
     try {
-      const resp = await fetch("http://18.141.159.229:5050/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: data.username,
-          password: data.password,
-        }),
-      });
-
-      const json = await resp.json();
-
-      if (!resp.ok) throw new Error(json.message);
+      await signUp(data.username, data.password);
 
       toast({
         title: "Sign up success!",
