@@ -1,11 +1,14 @@
 import TimerPage from "./pages/timer";
+import TasksProvider from "./providers/TasksProvider";
 import TimerProvider from "./providers/TimerProvider";
 
 function App() {
   return (
-    <TimerProvider>
-      <TimerPage />
-    </TimerProvider>
+    <TasksProvider>
+      <TimerProvider>
+        <TimerPage />
+      </TimerProvider>
+    </TasksProvider>
   );
 }
 

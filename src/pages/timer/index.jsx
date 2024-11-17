@@ -3,6 +3,8 @@ import HeaderNav from "../../components/HeaderNav";
 import { useTimer } from "../../hooks/useTimer";
 import TimerSection from "../../components/timer/TimerSection";
 import { useEffect, useState } from "react";
+import TasksSection from "../../components/tasks/TasksSection";
+import TaskSelectedSection from "../../components/tasks/TaskSelectedSection";
 
 export default function TimerPage() {
   const {
@@ -23,7 +25,8 @@ export default function TimerPage() {
   return (
     <Box
       backgroundColor={
-        (focusBackground && playing && selectedOption === "focus-time") || focusBackgroundPreview
+        (focusBackground && playing && selectedOption === "focus-time") ||
+        focusBackgroundPreview
           ? "black"
           : color
       }
@@ -72,11 +75,14 @@ export default function TimerPage() {
         zIndex={3}
       >
         <HeaderNav />
-        <Grid templateColumns="repeat(2, 1fr)" mt="62px">
+        <Grid templateColumns="repeat(2, 1fr)" mt="62px" columnGap={"40px"}>
           <GridItem width="100%">
             <TimerSection />
           </GridItem>
-          <GridItem width="100%"></GridItem>
+          <GridItem width="100%">
+            <TaskSelectedSection />
+            <TasksSection />
+          </GridItem>
         </Grid>
       </Box>
     </Box>
