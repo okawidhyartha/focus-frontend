@@ -1,6 +1,7 @@
 import { Text } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTimer } from "../../hooks/useTimer";
+import { useTasks } from "../../hooks/useTasks";
 import { TIMER_OPTIONS } from "../../helpers/constants";
 
 function formatTime(seconds) {
@@ -21,41 +22,46 @@ export default function TimerCount() {
     getNextOption,
     playing,
     setPlaying,
-    setPlayingAlarm
+    setPlayingAlarm,
   } = useTimer();
+  const { increaseActCycle } = useTasks();
 
   const intervalRef = useRef(null);
-
-  const changeTimer = useCallback(() => {
-    const optionData = TIMER_OPTIONS.find(
-      (option) => option.value === selectedOption
-    );
-    setColor(optionData.color);
-    setPlaying(false);
-    setTimeSeconds(optionData.minutes * 60);
-  }, [setColor, selectedOption, setPlaying]);
 
   const startTimer = useCallback(() => {
     if (intervalRef.current) return;
     intervalRef.current = setInterval(() => {
       setTimeSeconds((prevTime) => {
         if (prevTime === 0) {
-          const nextOptionData = getNextOption();
-          setSelectedOption(nextOptionData.value);
-          setPlayingAlarm(true);
+          clearInterval(intervalRef.current);
           return 0;
         }
 
         return prevTime - 1;
       });
     }, 1000);
-  }, [getNextOption, setSelectedOption]);
+  }, []);
 
   useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+    if (timeSeconds === 0) setPlaying(false);
+  }, [setPlaying, timeSeconds]);
+
+  useEffect(() => {
+    if (timeSeconds === 0 && playing) {
+      if (selectedOption === TIMER_OPTIONS[0].value) increaseActCycle();
+      const nextOptionData = getNextOption();
+      setSelectedOption(nextOptionData.value);
+      setPlayingAlarm(true);
+    }
+  }, [
+    getNextOption,
+    increaseActCycle,
+    playing,
+    selectedOption,
+    setPlayingAlarm,
+    setSelectedOption,
+    timeSeconds,
+  ]);
 
   useEffect(() => {
     if (playing) startTimer();
@@ -68,8 +74,13 @@ export default function TimerCount() {
   }, [playing, startTimer]);
 
   useEffect(() => {
-    changeTimer();
-  }, [selectedOption, changeTimer]);
+    const optionData = TIMER_OPTIONS.find(
+      (option) => option.value === selectedOption
+    );
+    setColor(optionData.color);
+    setPlaying(false);
+    setTimeSeconds(optionData.minutes * 60);
+  }, [selectedOption, setColor, setPlaying]);
 
   return (
     <Text

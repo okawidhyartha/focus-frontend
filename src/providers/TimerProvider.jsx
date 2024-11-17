@@ -28,6 +28,10 @@ export default function TimerProvider({ children }) {
     return nextOptionData;
   }, [selectedOption]);
 
+  const timerFinish = useCallback(() => {
+    setPlaying(false);
+  }, []);
+
   useEffect(() => {
     if (focusMusic) {
       const musicData = FOCUS_MUSICS.find(
@@ -62,7 +66,8 @@ export default function TimerProvider({ children }) {
         playingAlarm,
         setPlayingAlarm,
         isVisibleAlarmSetting,
-        setIsVisibleAlarmSetting
+        setIsVisibleAlarmSetting,
+        timerFinish,
       }}
     >
       {children}

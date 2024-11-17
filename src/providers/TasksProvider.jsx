@@ -46,6 +46,17 @@ export default function TasksProvider({ children }) {
     setSelectedTask((prev) => (prev?.id === id ? null : prev));
   }, []);
 
+  const increaseActCycle = useCallback(() => {
+    setTasks((prev) =>
+      prev.map((task) => {
+        if (task.id === selectedTask.id) {
+          return { ...task, actCycle: task.actCycle + 1 };
+        }
+        return task;
+      })
+    );
+  }, [selectedTask]);
+
   return (
     <TasksContext.Provider
       value={{
@@ -56,6 +67,7 @@ export default function TasksProvider({ children }) {
         selectedTask,
         selecTask,
         toggleDone,
+        increaseActCycle,
       }}
     >
       {children}
