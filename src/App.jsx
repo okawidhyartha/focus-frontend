@@ -1,12 +1,13 @@
-import TimerPage from "./pages/timer";
+import { RouterProvider } from "react-router-dom";
 import TasksProvider from "./providers/TasksProvider";
 import TimerProvider from "./providers/TimerProvider";
+import { router } from "./router";
 
 function App() {
   return (
     <TasksProvider>
       <TimerProvider>
-        <TimerPage />
+        <RouterProvider router={router} />
       </TimerProvider>
     </TasksProvider>
   );
