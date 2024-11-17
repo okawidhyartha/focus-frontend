@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useState } from "react";
-import { FOCUS_MUSICS, TIMER_OPTIONS } from "../helpers/constants";
+import { FOCUS_MUSICS, TIMER_OPTIONS, TIMER_ORDER } from "../helpers/constants";
 
 export const TimerContext = createContext(null);
 
@@ -17,16 +17,17 @@ export default function TimerProvider({ children }) {
   const [isVisibleFocusMusicSetting, setIsVisibleFocusMusicSetting] =
     useState(false);
   const [isVisibleAlarmSetting, setIsVisibleAlarmSetting] = useState(false);
+  const [timerOrder, setTimerOrder] = useState(0);
 
-  const getNextOption = useCallback(() => {
-    const optionIndex = TIMER_OPTIONS.findIndex(
-      (option) => option.value === selectedOption
-    );
-    let nextOptionIndex = optionIndex + 1;
-    if (optionIndex == 2) nextOptionIndex = 0;
-    const nextOptionData = TIMER_OPTIONS[nextOptionIndex];
-    return nextOptionData;
-  }, [selectedOption]);
+  const setNextOption = useCallback(() => {
+    let nextOrder = timerOrder + 1;
+    if (selectedOption !== TIMER_ORDER[timerOrder]) {
+      nextOrder = TIMER_ORDER.findIndex((order) => order === selectedOption) + 1;
+    }
+    if (nextOrder === TIMER_ORDER.length) nextOrder = 0;
+    setTimerOrder(nextOrder);
+    setSelectedOption(TIMER_ORDER[nextOrder]);
+  }, [selectedOption, timerOrder]);
 
   const timerFinish = useCallback(() => {
     setPlaying(false);
@@ -52,7 +53,7 @@ export default function TimerProvider({ children }) {
         setSelectedOption,
         playing,
         setPlaying,
-        getNextOption,
+        setNextOption,
         focusMusic,
         setFocusMusic,
         focusBackground,

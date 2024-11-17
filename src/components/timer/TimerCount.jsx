@@ -19,7 +19,7 @@ export default function TimerCount() {
     setColor,
     selectedOption,
     setSelectedOption,
-    getNextOption,
+    setNextOption,
     playing,
     setPlaying,
     setPlayingAlarm,
@@ -49,12 +49,11 @@ export default function TimerCount() {
   useEffect(() => {
     if (timeSeconds === 0 && playing) {
       if (selectedOption === TIMER_OPTIONS[0].value) increaseActCycle();
-      const nextOptionData = getNextOption();
-      setSelectedOption(nextOptionData.value);
+      setNextOption();
       setPlayingAlarm(true);
     }
   }, [
-    getNextOption,
+    setNextOption,
     increaseActCycle,
     playing,
     selectedOption,

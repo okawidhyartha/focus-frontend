@@ -33,6 +33,17 @@ export const TIMER_OPTIONS = [
   },
 ];
 
+export const TIMER_ORDER = [
+  "focus-time",
+  "short-break",
+  "focus-time",
+  "short-break",
+  "focus-time",
+  "short-break",
+  "focus-time",
+  "long-break",
+];
+
 export const FOCUS_MUSICS = [
   {
     name: "None",
