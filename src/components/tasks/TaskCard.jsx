@@ -32,7 +32,7 @@ export default function TaskCard({ task }) {
       }
     >
       <HStack>
-        <Checkbox checked={done} onChange={() => toggleDone(id)} />
+        <Checkbox checked={done} defaultChecked={done} onChange={() => toggleDone(task)} />
         {done ? (
           <Text as={"s"}>{description}</Text>
         ) : (

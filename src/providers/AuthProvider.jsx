@@ -1,50 +1,72 @@
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { API_URL, AUTH_USERNAME_KEY } from "../helpers/constants";
 
 export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
   const [authUsername, setAuthUsername] = useState(null);
 
-  const signIn = useCallback(async (username, password) => {
-    const resp = await fetch("https://capstone-pomodoro.duckdns.org/signin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    });
-
-    const json = await resp.json();
-
-    if (!resp.ok) throw new Error(json.message);
-
+  const loadAuthUsername = useCallback(() => {
+    const username = localStorage.getItem(AUTH_USERNAME_KEY);
     setAuthUsername(username);
   }, []);
 
-  const signUp = useCallback(async (username, password) => {
-    const resp = await fetch("https://capstone-pomodoro.duckdns.org/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    });
+  useEffect(() => {
+    loadAuthUsername();
+  }, [loadAuthUsername]);
 
-    const json = await resp.json();
-
-    if (!resp.ok) throw new Error(json.message);
-
+  const saveAuthUsername = useCallback((username) => {
+    localStorage.setItem(AUTH_USERNAME_KEY, username);
     setAuthUsername(username);
   }, []);
+
+  const signIn = useCallback(
+    async (username, password) => {
+      const resp = await fetch(API_URL + "/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      const json = await resp.json();
+
+      if (!resp.ok) throw new Error(json.message);
+
+      saveAuthUsername(username);
+    },
+    [saveAuthUsername]
+  );
+
+  const signUp = useCallback(
+    async (username, password) => {
+      const resp = await fetch(API_URL + "/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      const json = await resp.json();
+
+      if (!resp.ok) throw new Error(json.message);
+
+      saveAuthUsername(username);
+    },
+    [saveAuthUsername]
+  );
 
   const signOut = useCallback(() => {
+    localStorage.removeItem(AUTH_USERNAME_KEY);
     setAuthUsername(null);
   }, []);
 

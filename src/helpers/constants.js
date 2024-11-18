@@ -9,6 +9,10 @@ import AfternoonCoffeeBackground from "../assets/images/afternoon-coffee-backgro
 import AlarmBellHand from "../assets/audios/alarm-bell-hand.wav";
 import AlarmBellBackground from "../assets/images/counter-bell-background.webp";
 
+export const API_URL = "https://capstone-pomodoro.duckdns.org";
+
+export const AUTH_USERNAME_KEY = "authUsername";
+
 export const TIMER_OPTIONS = [
   {
     value: "focus-time",
