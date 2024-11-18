@@ -7,7 +7,7 @@ export default function AuthProvider({ children }) {
   const [authUsername, setAuthUsername] = useState(null);
 
   const signIn = useCallback(async (username, password) => {
-    const resp = await fetch("http://18.141.159.229:5050/signin", {
+    const resp = await fetch("https://capstone-pomodoro.duckdns.org/signin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export default function AuthProvider({ children }) {
   }, []);
 
   const signUp = useCallback(async (username, password) => {
-    const resp = await fetch("http://18.141.159.229:5050/signup", {
+    const resp = await fetch("https://capstone-pomodoro.duckdns.org/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
