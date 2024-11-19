@@ -3,11 +3,14 @@ import { Box } from "@chakra-ui/react";
 import { useTimer } from "../../hooks/useTimer";
 import { ALARMS } from "../../helpers/constants";
 import { useCallback, useEffect, useState } from "react";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function AlarmPlayer() {
-  const { alarm, playingAlarm, setPlayingAlarm } = useTimer();
+  const { playingAlarm, setPlayingAlarm } = useTimer();
   const [player, setPlayer] = useState(null);
   const [playing, setPlaying] = useState(false);
+
+  const { alarm } = useSettings();
 
   const alarmFile = ALARMS.find((_alarm) => _alarm.value === alarm).audio;
 

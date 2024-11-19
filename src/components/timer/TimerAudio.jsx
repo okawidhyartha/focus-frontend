@@ -3,9 +3,11 @@ import ReactPlayer from "react-player";
 import { Box } from "@chakra-ui/react";
 import { useTimer } from "../../hooks/useTimer";
 import { FOCUS_MUSICS } from "../../helpers/constants";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function TimerAudio() {
-  const { focusMusic, playing: playingTImer } = useTimer();
+  const { playing: playingTImer } = useTimer();
+  const { focusMusic } = useSettings();
   const [playingOne, setPlayingOne] = useState(false);
   const [playingTwo, setPlayingTwo] = useState(false);
   const [volumeOne, setVolumeOne] = useState(1);
@@ -14,7 +16,9 @@ export default function TimerAudio() {
   const [playerTwo, setPlayerTwo] = useState(null);
   const [playerActive, setPlayerActive] = useState(1);
 
-  const musicFile = FOCUS_MUSICS.find((music) => music.value === focusMusic).audio;
+  const musicFile = FOCUS_MUSICS.find(
+    (music) => music.value === focusMusic
+  ).audio;
 
   // Fade function to gradually adjust volume
   const fadeVolume = useCallback(

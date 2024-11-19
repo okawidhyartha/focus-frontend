@@ -5,15 +5,12 @@ import TimerSection from "../../components/timer/TimerSection";
 import { useEffect, useState } from "react";
 import TasksSection from "../../components/tasks/TasksSection";
 import TaskSelectedSection from "../../components/tasks/TaskSelectedSection";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function TimerPage() {
-  const {
-    color,
-    focusBackground,
-    focusBackgroundPreview,
-    selectedOption,
-    playing,
-  } = useTimer();
+  const { selectedOption, playing } = useTimer();
+  const { color, focusBackground, focusBackgroundPreview } = useSettings();
+
   const [prevFocusBackgroundPreview, setPrevFocusBackgroundPreview] =
     useState(null);
 

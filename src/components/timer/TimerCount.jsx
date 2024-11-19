@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTimer } from "../../hooks/useTimer";
 import { useTasks } from "../../hooks/useTasks";
 import { TIMER_OPTIONS } from "../../helpers/constants";
+import { useSettings } from "../../hooks/useSettings";
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -14,9 +15,8 @@ function formatTime(seconds) {
 }
 
 export default function TimerCount() {
-  const [timeSeconds, setTimeSeconds] = useState(TIMER_OPTIONS[0].minutes * 60);
+  const { timerDuration } = useSettings();
   const {
-    setColor,
     selectedOption,
     setSelectedOption,
     setNextOption,
@@ -24,6 +24,10 @@ export default function TimerCount() {
     setPlaying,
     setPlayingAlarm,
   } = useTimer();
+
+  const { setColor } = useSettings();
+
+  const [timeSeconds, setTimeSeconds] = useState(timerDuration[selectedOption] * 60);
   const { increaseActCycle } = useTasks();
 
   const intervalRef = useRef(null);
@@ -78,8 +82,8 @@ export default function TimerCount() {
     );
     setColor(optionData.color);
     setPlaying(false);
-    setTimeSeconds(optionData.minutes * 60);
-  }, [selectedOption, setColor, setPlaying]);
+    setTimeSeconds(timerDuration[selectedOption] * 60);
+  }, [selectedOption, setColor, setPlaying, timerDuration]);
 
   return (
     <Text

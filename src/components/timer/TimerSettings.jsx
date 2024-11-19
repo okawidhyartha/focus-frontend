@@ -1,10 +1,12 @@
 import { Button, Grid, GridItem } from "@chakra-ui/react";
 import { IconAlarm, IconMusic } from "@tabler/icons-react";
-import { useTimer } from "../../hooks/useTimer";
 import { ALARMS, FOCUS_MUSICS } from "../../helpers/constants";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function TimerSettings() {
-  const { focusMusic, alarm, setIsVisibleFocusMusicSetting, setIsVisibleAlarmSetting } = useTimer();
+  const { setIsVisibleFocusMusicSetting, setIsVisibleAlarmSetting } =
+    useSettings();
+  const { focusMusic, alarm } = useSettings();
 
   const musicName = FOCUS_MUSICS.find(
     (music) => music.value === focusMusic

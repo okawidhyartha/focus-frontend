@@ -11,16 +11,18 @@ import LogoApp from "./LogoApp";
 import { IconSettings, IconUser } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useSettings } from "../hooks/useSettings";
 
 export default function HeaderNav() {
   const navigate = useNavigate();
   const { authUsername, signOut } = useAuth();
+  const { openSettings } = useSettings();
 
   return (
     <HStack justify="space-between" py="14px" borderBottom="1px solid white">
       <LogoApp />
       <HStack spacing="17px">
-        <Button leftIcon={<IconSettings />}>Setting</Button>
+        <Button leftIcon={<IconSettings />} onClick={openSettings}>Setting</Button>
         {!authUsername && (
           <Button leftIcon={<IconUser />} onClick={() => navigate("/sign-up")}>
             Sign up

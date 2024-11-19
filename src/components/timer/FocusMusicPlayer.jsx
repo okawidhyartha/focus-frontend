@@ -3,9 +3,12 @@ import { Box } from "@chakra-ui/react";
 import { useTimer } from "../../hooks/useTimer";
 import { FOCUS_MUSICS } from "../../helpers/constants";
 import { useRef, useState } from "react";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function FocusMusicPlayer() {
-  const { focusMusic, playing, selectedOption } = useTimer();
+  const { playing, selectedOption } = useTimer();
+  const { focusMusic } = useSettings();
+
   const [player, setPlayer] = useState(null);
   const prevSelctedOptions = useRef(selectedOption);
 

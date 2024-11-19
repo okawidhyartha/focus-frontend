@@ -10,7 +10,6 @@ import {
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import { useTimer } from "../../hooks/useTimer";
 import ReactPlayer from "react-player";
 import { useState } from "react";
 import {
@@ -20,15 +19,18 @@ import {
   IconCircleX,
 } from "@tabler/icons-react";
 import { FOCUS_MUSICS } from "../../helpers/constants";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function FocusMusicSlider() {
   const toast = useToast();
   const {
-    focusMusic,
-    setFocusMusic,
     setFocusBackgroundPreview,
     setIsVisibleFocusMusicSetting,
-  } = useTimer();
+    focusMusic,
+    setFocusMusic,
+    editSettings,
+  } = useSettings();
+
   const [previewMusic, setPreviewMusic] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState(focusMusic);
@@ -52,6 +54,7 @@ export default function FocusMusicSlider() {
       position: "top-right",
     });
     setIsVisibleFocusMusicSetting(false);
+    editSettings();
   };
 
   const handleClose = () => {

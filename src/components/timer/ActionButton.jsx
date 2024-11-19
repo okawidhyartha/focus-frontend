@@ -1,10 +1,11 @@
 import { Button } from "@chakra-ui/react";
 import { useTimer } from "../../hooks/useTimer";
+import { useSettings } from "../../hooks/useSettings";
 
 // eslint-disable-next-line react/prop-types
 export default function ActionButton({ children, ...props }) {
-  const { color, focusBackground, focusBackgroundPreview, playing, selectedOption } =
-    useTimer();
+  const { playing, selectedOption } = useTimer();
+  const { color, focusBackground, focusBackgroundPreview } = useSettings();
 
   return (
     <Button

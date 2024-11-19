@@ -10,14 +10,14 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useTimer } from "../../hooks/useTimer";
 import LogoApp from "../../components/LogoApp";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function SignUpPage() {
-  const { color } = useTimer();
+  const { color } = useSettings();
   const { signUp } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
