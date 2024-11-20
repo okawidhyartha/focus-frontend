@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Grid, GridItem, VStack } from "@chakra-ui/react";
 import HeaderNav from "../../components/HeaderNav";
 import { useTimer } from "../../hooks/useTimer";
 import TimerSection from "../../components/timer/TimerSection";
@@ -67,18 +67,25 @@ export default function TimerPage() {
         width="100%"
         minHeight="100vh"
         height="100%"
-        px="77px"
-        py="50px"
+        px={{ base: "20px", md: "77px" }}
+        py={{ base: "10px", md: "50px" }}
         zIndex={3}
       >
         <HeaderNav />
-        <Grid templateColumns="repeat(2, 1fr)" mt="62px" columnGap={"40px"}>
+        <Grid
+          templateColumns={{ base: "repeat(1, 1fr)", lg: "repeat(2, 1fr)" }}
+          mt={{ base: "40px", md: "62px" }}
+          columnGap={"40px"}
+          rowGap={"40px"}
+        >
           <GridItem width="100%">
             <TimerSection />
           </GridItem>
           <GridItem width="100%">
-            <TaskSelectedSection />
-            <TasksSection />
+            <VStack width={"100%"}>
+              <TaskSelectedSection />
+              <TasksSection />
+            </VStack>
           </GridItem>
         </Grid>
       </Box>

@@ -76,13 +76,16 @@ export default function ModalSettings({ isOpen, onClose }) {
   ]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"5xl"}>
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "5xl" }}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Setting</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Grid templateColumns="repeat(2, 1fr)">
+          <Grid
+            templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }}
+            rowGap={4}
+          >
             <GridItem>
               <VStack align={"flex-start"}>
                 <Text fontWeight={"bold"}>Time (minutes)</Text>

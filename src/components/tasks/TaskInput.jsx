@@ -6,6 +6,7 @@ import {
   Input,
   NumberInput,
   NumberInputField,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -24,14 +25,16 @@ const AddTaskButton = (props) => {
       width={"100%"}
       height={"100%"}
       color={"white"}
-      py={"20px"}
+      py={{ base: "15px", md: "20px" }}
       _hover={{
         backgroundColor: "rgba(0, 0, 0, 0.7)",
       }}
       {...props}
     >
-      <IconCirclePlus size={24} />
-      <Text ml={2}>Add Task</Text>
+      <IconCirclePlus />
+      <Text ml={2} fontSize={{ base: "14px", md: "16px" }}>
+        Add Task
+      </Text>
     </Button>
   );
 };
@@ -73,11 +76,11 @@ export default function TaskInput() {
       overflow={"hidden"}
     >
       <VStack
-        px="48px"
+        px={{ base: "20px", md: "48px" }}
         width={"100%"}
         align={"flex-start"}
         spacing={0}
-        py="20px"
+        py={{ base: "14px", md: "20px" }}
       >
         <Input
           placeholder="What are you working on?"
@@ -86,8 +89,14 @@ export default function TaskInput() {
           value={task}
           onChange={(e) => setTask(e.target.value)}
         />
-        <HStack justify={"space-between"} width={"100%"}>
-          <Text color={"#7D7D7D"}>est focus cycle time</Text>
+        <Stack
+          justify={"space-between"}
+          width={"100%"}
+          direction={{ base: "column", md: "row" }}
+        >
+          <Text color={"#7D7D7D"} fontSize={{ base: "14px", md: "16px" }}>
+            est focus cycle time
+          </Text>
           <HStack>
             <IconButton
               icon={<IconChevronDown />}
@@ -95,11 +104,16 @@ export default function TaskInput() {
               disabled={focusCycle === 1}
               color={"#7D7D7D"}
             />
-            <NumberInput value={focusCycle} min={1} width={"60px"}>
+            <NumberInput
+              value={focusCycle}
+              min={1}
+              width={{ base: "40px", md: "60px" }}
+            >
               <NumberInputField
                 textAlign={"center"}
                 padding={0}
                 color={"#7D7D7D"}
+                fontSize={{ base: "14px", md: "16px" }}
               />
             </NumberInput>
             <IconButton
@@ -108,16 +122,17 @@ export default function TaskInput() {
               color={"#7D7D7D"}
             />
           </HStack>
-        </HStack>
+        </Stack>
       </VStack>
       <HStack
         backgroundColor={"rgba(0, 0, 0, 0.2)"}
-        padding={"26px 49px 19px 49px"}
+        padding={{ base: "16px 16px 16px 16px", md: "26px 49px 19px 49px" }}
         justify={"flex-end"}
       >
         <Button
           variant="ghost"
           color={"#645B5B"}
+          fontSize={{ base: "14px", md: "16px" }}
           onClick={() => setShowInput(false)}
         >
           Cancel
@@ -126,6 +141,7 @@ export default function TaskInput() {
           disabled={!task}
           backgroundColor={"#645B5B"}
           color={"white"}
+          fontSize={{ base: "14px", md: "16px" }}
           _hover={{
             backgroundColor: "#574f4f",
           }}

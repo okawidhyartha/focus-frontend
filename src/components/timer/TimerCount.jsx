@@ -27,7 +27,9 @@ export default function TimerCount() {
 
   const { setColor } = useSettings();
 
-  const [timeSeconds, setTimeSeconds] = useState(timerDuration[selectedOption] * 60);
+  const [timeSeconds, setTimeSeconds] = useState(
+    timerDuration[selectedOption] * 60
+  );
   const { increaseActCycle } = useTasks();
 
   const intervalRef = useRef(null);
@@ -87,7 +89,7 @@ export default function TimerCount() {
 
   return (
     <Text
-      fontSize="128px"
+      fontSize={{ base: "50px", md: "128px" }}
       fontWeight="bold"
       letterSpacing="-1.7%"
       color={"white"}

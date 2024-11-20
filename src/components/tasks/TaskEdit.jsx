@@ -44,11 +44,11 @@ export default function TaskEdit({ task, onCancel }) {
       overflow={"hidden"}
     >
       <VStack
-        px="48px"
+        px={{ base: "20px", md: "48px" }}
         width={"100%"}
         align={"flex-start"}
         spacing={0}
-        py="20px"
+        py={{ base: "14px", md: "20px" }}
       >
         <Input
           placeholder="What are you working on?"
@@ -58,22 +58,33 @@ export default function TaskEdit({ task, onCancel }) {
           onChange={(e) => setDescription(e.target.value)}
         />
         <VStack align={"flex-start"} width={"100%"}>
-          <Text color={"#7D7D7D"}>act / est focus cycle time</Text>
+          <Text color={"#7D7D7D"} fontSize={{ base: "14px", md: "16px" }}>
+            act / est focus cycle time
+          </Text>
           <HStack>
-            <NumberInput value={task.actCycle} width={"60px"}>
+            <NumberInput
+              value={task.actCycle}
+              width={{ base: "40px", md: "60px" }}
+            >
               <NumberInputField
                 textAlign={"center"}
                 padding={0}
                 color={"#7D7D7D"}
                 disabled
+                fontSize={{ base: "14px", md: "16px" }}
               />
             </NumberInput>
             <Text>/</Text>
-            <NumberInput value={focusCycle} min={1} width={"60px"}>
+            <NumberInput
+              value={focusCycle}
+              min={1}
+              width={{ base: "40px", md: "60px" }}
+            >
               <NumberInputField
                 textAlign={"center"}
                 padding={0}
                 color={"#7D7D7D"}
+                fontSize={{ base: "14px", md: "16px" }}
               />
             </NumberInput>
             <IconButton
@@ -93,18 +104,24 @@ export default function TaskEdit({ task, onCancel }) {
       </VStack>
       <HStack
         backgroundColor={"rgba(0, 0, 0, 0.2)"}
-        padding={"26px 49px 19px 49px"}
+        padding={{ base: "16px 16px 16px 16px", md: "26px 49px 19px 49px" }}
         justify={"space-between"}
       >
         <Button
           variant="ghost"
           color={"#645B5B"}
+          fontSize={{ base: "14px", md: "16px" }}
           onClick={() => deleteTask(task.id)}
         >
           Delete
         </Button>
         <HStack>
-          <Button variant="ghost" color={"#645B5B"} onClick={onCancel}>
+          <Button
+            variant="ghost"
+            color={"#645B5B"}
+            fontSize={{ base: "14px", md: "16px" }}
+            onClick={onCancel}
+          >
             Cancel
           </Button>
           <Button
@@ -114,6 +131,7 @@ export default function TaskEdit({ task, onCancel }) {
             _hover={{
               backgroundColor: "#574f4f",
             }}
+            fontSize={{ base: "14px", md: "16px" }}
             onClick={handleSave}
           >
             Save

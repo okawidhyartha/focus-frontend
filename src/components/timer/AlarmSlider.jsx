@@ -5,6 +5,7 @@ import {
   Center,
   HStack,
   IconButton,
+  useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
 import { Navigation } from "swiper/modules";
@@ -29,6 +30,11 @@ export default function AlarmSlider() {
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState(alarm);
   const [swiper, setSwiper] = useState(null);
+
+  const swiperSlideWidth = useBreakpointValue({
+    base: "calc(100% / 2.5)",
+    md: "calc(100% / 4.5)",
+  });
 
   const handlePrev = () => {
     if (swiper) swiper.slidePrev();
@@ -72,10 +78,10 @@ export default function AlarmSlider() {
           onSwiper={(swiper) => setSwiper(swiper)}
         >
           {ALARMS.map((option) => (
-            <SwiperSlide style={{ width: "calc(100% / 4)" }} key={option.value}>
+            <SwiperSlide style={{ width: swiperSlideWidth }} key={option.value}>
               <Box
                 width="100%"
-                height="100px"
+                height={{base: "80px", md: "100px"}}
                 borderRadius="10px"
                 bg={
                   option.background
@@ -90,7 +96,7 @@ export default function AlarmSlider() {
               >
                 <Center
                   width="100%"
-                  height="100px"
+                  height={{base: "80px", md: "100px"}}
                   backdropFilter={option.background ? "brightness(0.6)" : ""}
                   borderRadius="10px"
                   border={
@@ -98,6 +104,7 @@ export default function AlarmSlider() {
                       ? "3px solid white"
                       : "1px solid black"
                   }
+                  fontSize={{base: "14px", md: "16px"}}
                   _hover={{
                     backdropFilter: option.background ? "brightness(0.3)" : "",
                   }}
@@ -129,6 +136,7 @@ export default function AlarmSlider() {
         <IconButton
           borderRadius="full"
           position="absolute"
+          display={{ base: "none", md: "flex" }}
           top="50%"
           left="-20px"
           transform="translate(0, -50%)"
@@ -140,6 +148,7 @@ export default function AlarmSlider() {
         <IconButton
           borderRadius="full"
           position="absolute"
+          display={{ base: "none", md: "flex" }}
           top="50%"
           right="-20px"
           transform="translate(0, -50%)"
@@ -154,6 +163,7 @@ export default function AlarmSlider() {
           width="fit-content"
           leftIcon={<IconCircleX />}
           onClick={handleClose}
+          fontSize={{base: "14px", md: "16px"}}
         >
           Close
         </Button>
@@ -161,6 +171,7 @@ export default function AlarmSlider() {
           width="fit-content"
           leftIcon={<IconCircleCheck />}
           onClick={handleApply}
+          fontSize={{base: "14px", md: "16px"}}
         >
           Apply
         </Button>

@@ -10,9 +10,9 @@ export default function ActionButton({ children, ...props }) {
   return (
     <Button
       textTransform="uppercase"
-      fontSize="36px"
-      height="59px"
-      px="36px"
+      fontSize={{ base: "20px", md: "36px" }}
+      height={{ base: "40px", md: "59px" }}
+      px={{ base: "20px", md: "36px" }}
       borderRadius="full"
       color={
         (playing && focusBackground && selectedOption === "focus-time") ||

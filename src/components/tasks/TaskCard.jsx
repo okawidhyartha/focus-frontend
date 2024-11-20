@@ -19,7 +19,7 @@ export default function TaskCard({ task }) {
     <Box
       backgroundColor="rgba(255, 255, 255, 0.8)"
       borderRadius="8px"
-      padding="16px"
+      padding={{base: "14px", md: "16px"}}
       width="100%"
       marginBottom="8px"
       onClick={() => selecTask(id)}
@@ -32,18 +32,24 @@ export default function TaskCard({ task }) {
       }
     >
       <HStack>
-        <Checkbox checked={done} defaultChecked={done} onChange={() => toggleDone(task)} />
+        <Checkbox
+          checked={done}
+          defaultChecked={done}
+          onChange={() => toggleDone(task)}
+        />
         {done ? (
-          <Text as={"s"}>{description}</Text>
+          <Text fontSize={{ base: "14px", md: "16px" }} as={"s"}>
+            {description}
+          </Text>
         ) : (
-          <Text>{description}</Text>
+          <Text fontSize={{ base: "14px", md: "16px" }}>{description}</Text>
         )}
       </HStack>
       <HStack alignSelf={"flex-end"}>
-        <Text>
+        <Text fontSize={{ base: "14px", md: "16px" }}>
           {actCycle} / {estCycle}
         </Text>
-        <Button onClick={() => setShowEdit(true)}>Edit</Button>
+        <Button fontSize={{ base: "14px", md: "16px" }} onClick={() => setShowEdit(true)}>Edit</Button>
       </HStack>
     </Box>
   );

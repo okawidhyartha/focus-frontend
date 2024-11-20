@@ -6,8 +6,12 @@ import TaskCard from "./TaskCard";
 export default function TasksSection() {
   const { tasks } = useTasks();
   return (
-    <VStack align="flex-start">
-      <Heading as={"h2"} color={"white"} fontSize={"32px"}>
+    <VStack align="flex-start" width={"full"}>
+      <Heading
+        as={"h2"}
+        color={"white"}
+        fontSize={{ base: "24px", md: "32px" }}
+      >
         Tasks
       </Heading>
       <Box height="1px" width="100%" backgroundColor="gray.200" />

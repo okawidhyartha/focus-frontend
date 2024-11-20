@@ -1,4 +1,4 @@
-import { Button, Grid, GridItem } from "@chakra-ui/react";
+import { Button, Grid, GridItem, Text } from "@chakra-ui/react";
 import { IconAlarm, IconMusic } from "@tabler/icons-react";
 import { ALARMS, FOCUS_MUSICS } from "../../helpers/constants";
 import { useSettings } from "../../hooks/useSettings";
@@ -15,7 +15,12 @@ export default function TimerSettings() {
   const alarmName = ALARMS.find((_alarm) => _alarm.value === alarm).name;
 
   return (
-    <Grid templateColumns="repeat(2, 1fr)" width="100%" gap="20px" p="30px">
+    <Grid
+      templateColumns={{ base: "repeat(1, 1fr)", sm: "repeat(2, 1fr)" }}
+      width="100%"
+      gap={{ base: "12px", md: "20px" }}
+      p={{ base: "20px", md: "30px" }}
+    >
       <GridItem>
         <Button
           backgroundColor="white"
@@ -24,9 +29,10 @@ export default function TimerSettings() {
           borderRadius="8px"
           width="100%"
           leftIcon={<IconMusic />}
+          fontSize={{ base: "14px", md: "16px" }}
           onClick={() => setIsVisibleFocusMusicSetting((prev) => !prev)}
         >
-          Focus music: {musicName}
+          <Text noOfLines={1}>Focus music: {musicName}</Text>
         </Button>
       </GridItem>
       <GridItem>
@@ -37,9 +43,10 @@ export default function TimerSettings() {
           borderRadius="8px"
           width="100%"
           leftIcon={<IconAlarm />}
+          fontSize={{ base: "14px", md: "16px" }}
           onClick={() => setIsVisibleAlarmSetting((prev) => !prev)}
         >
-          Alarm: {alarmName}
+          <Text noOfLines={1}>Alarm: {alarmName}</Text>
         </Button>
       </GridItem>
     </Grid>

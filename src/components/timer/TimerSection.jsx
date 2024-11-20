@@ -14,7 +14,7 @@ export default function TimerSection() {
   return (
     <>
       <VStack
-        pt="30px"
+        pt={{ base: "20px", md: "30px" }}
         pb="0"
         background="rgba(255,255,255,0.3)"
         borderRadius="10px"
