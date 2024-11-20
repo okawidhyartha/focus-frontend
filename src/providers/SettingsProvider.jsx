@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useLayoutEffect, useState } from "react";
 import PropTypes from "prop-types";
 import ModalSettings from "../components/settings/ModalSettings";
 import { useDisclosure } from "@chakra-ui/react";
@@ -25,6 +25,14 @@ export default function SettingsProvider({ children }) {
   const [isVisibleAlarmSetting, setIsVisibleAlarmSetting] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  useLayoutEffect(() => {
+    if (isVisibleFocusMusicSetting) setIsVisibleAlarmSetting(false);
+  }, [isVisibleFocusMusicSetting]);
+
+  useLayoutEffect(() => {
+    if (isVisibleAlarmSetting) setIsVisibleFocusMusicSetting(false);
+  }, [isVisibleAlarmSetting]);
 
   useEffect(() => {
     if (focusMusic) {
