@@ -71,9 +71,9 @@ export default function SettingsProvider({ children }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        pomodoro: timerDuration["focus-time"],
-        short: timerDuration["short-break"],
-        long: timerDuration["long-break"],
+        pomodoro: timerDuration["focus-time"].toString(),
+        short: timerDuration["short-break"].toString(),
+        long: timerDuration["long-break"].toString(),
         alarm: alarm,
         backsound: focusMusic,
       }),
