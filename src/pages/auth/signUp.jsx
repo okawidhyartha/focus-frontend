@@ -64,17 +64,26 @@ export default function SignUpPage() {
       <Box
         borderRadius={15}
         backgroundColor={"white"}
-        px={"40px"}
-        py="40px"
-        mt="60px"
+        p={{ base: "20px", md: "40px" }}
+        width={{ base: "80vw", md: "500px" }}
+        mt={{ base: "30px", md: "60px" }}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack gap={5} mb="40px">
+          <VStack
+            gap={{ base: "10px", md: 5 }}
+            mb={{ base: "20px", md: "40px" }}
+          >
             <FormControl isRequired isInvalid={errors.username}>
-              <FormLabel htmlFor="username">Username</FormLabel>
+              <FormLabel
+                fontSize={{ base: "14px", md: "16px" }}
+                htmlFor="username"
+              >
+                Username
+              </FormLabel>
               <Input
+                fontSize={{ base: "14px", md: "16px" }}
                 type="text"
-                width={500}
+                width={"full"}
                 id="username"
                 {...register("username", {
                   required: "This is required",
@@ -88,15 +97,21 @@ export default function SignUpPage() {
                   },
                 })}
               />
-              <FormErrorMessage>
+              <FormErrorMessage fontSize={{ base: "14px", md: "16px" }}>
                 {errors.username && errors.username.message}
               </FormErrorMessage>
             </FormControl>
             <FormControl isRequired isInvalid={errors.password}>
-              <FormLabel htmlFor="password">Password</FormLabel>
+              <FormLabel
+                fontSize={{ base: "14px", md: "16px" }}
+                htmlFor="password"
+              >
+                Password
+              </FormLabel>
               <Input
+                fontSize={{ base: "14px", md: "16px" }}
                 type="password"
-                width={500}
+                width={"full"}
                 id="password"
                 {...register("password", {
                   required: "This is required",
@@ -106,15 +121,21 @@ export default function SignUpPage() {
                   },
                 })}
               />
-              <FormErrorMessage>
+              <FormErrorMessage fontSize={{ base: "14px", md: "16px" }}>
                 {errors.password && errors.password.message}
               </FormErrorMessage>
             </FormControl>
             <FormControl isRequired isInvalid={errors.confirmPassword}>
-              <FormLabel htmlFor="confirmPassword">Confirm password</FormLabel>
+              <FormLabel
+                fontSize={{ base: "14px", md: "16px" }}
+                htmlFor="confirmPassword"
+              >
+                Confirm password
+              </FormLabel>
               <Input
+                fontSize={{ base: "14px", md: "16px" }}
                 type="password"
-                width={500}
+                width={"full"}
                 id="confirmPassword"
                 {...register("confirmPassword", {
                   required: "This is required",
@@ -127,13 +148,14 @@ export default function SignUpPage() {
                     "The passwords do not match",
                 })}
               />
-              <FormErrorMessage>
+              <FormErrorMessage fontSize={{ base: "14px", md: "16px" }}>
                 {errors.confirmPassword && errors.confirmPassword.message}
               </FormErrorMessage>
             </FormControl>
           </VStack>
           <Button
-            size={"lg"}
+            fontSize={{ base: "14px", md: "16px" }}
+            size={{ base: "md", md: "lg" }}
             width={"100%"}
             type="submit"
             isLoading={isSubmitting}
@@ -145,14 +167,14 @@ export default function SignUpPage() {
       </Box>
       <Text
         fontWeight={"bold"}
-        fontSize={"20px"}
+        fontSize={{ base: "18px", md: "20px" }}
         color={"rgba(255,255,255,0.9)"}
         mt="20px"
       >
         Already have an account?
       </Text>
       <Button
-        fontSize={"20px"}
+        fontSize={{ base: "18px", md: "20px" }}
         color={"white"}
         variant={"link"}
         mt="15px"
