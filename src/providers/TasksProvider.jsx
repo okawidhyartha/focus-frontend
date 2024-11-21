@@ -121,10 +121,26 @@ export default function TasksProvider({ children }) {
     [authUsername, fetchTasks]
   );
 
-  const deleteTask = useCallback((id) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
-    setSelectedTask((prev) => (prev?.id === id ? null : prev));
-  }, []);
+  const deleteTask = useCallback(
+    async (id) => {
+      const resp = await fetch(API_URL + "/task/" + id, {
+        method: "DELETE",
+      });
+
+      if (resp.ok) fetchTasks();
+      // setTasks((prev) =>
+      //   prev.map((t) => {
+      //     if (t.id === task.id) {
+      //       return task;
+      //     }
+      //     return t;
+      //   })
+      // );
+      // setTasks((prev) => prev.filter((task) => task.id !== id));
+      // setSelectedTask((prev) => (prev?.id === id ? null : prev));
+    },
+    [fetchTasks]
+  );
 
   const increaseActCycle = useCallback(async () => {
     selectedTask.actCycle += 1;

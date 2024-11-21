@@ -17,7 +17,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useSettings } from "../../hooks/useSettings";
 
 export default function SignUpPage() {
-  const { color } = useSettings();
+  const { color, addSettings } = useSettings();
   const { signUp } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ export default function SignUpPage() {
   const onSubmit = async (data) => {
     try {
       await signUp(data.username, data.password);
+      await addSettings(data.username);
 
       toast({
         title: "Sign up success!",

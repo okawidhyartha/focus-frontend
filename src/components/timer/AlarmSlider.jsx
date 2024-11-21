@@ -24,8 +24,7 @@ import { useSettings } from "../../hooks/useSettings";
 
 export default function AlarmSlider() {
   const toast = useToast();
-  const { alarm, setAlarm, setIsVisibleAlarmSetting, editSettings } =
-    useSettings();
+  const { alarm, updateAlarm, setIsVisibleAlarmSetting } = useSettings();
   const [previewMusic, setPreviewMusic] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState(alarm);
@@ -45,7 +44,7 @@ export default function AlarmSlider() {
   };
 
   const handleApply = () => {
-    setAlarm(selected);
+    updateAlarm(selected);
     toast({
       title: "Alarm applied!",
       status: "success",
@@ -54,7 +53,6 @@ export default function AlarmSlider() {
       position: "top-right",
     });
     setIsVisibleAlarmSetting(false);
-    editSettings();
   };
 
   const handleClose = () => {
@@ -81,7 +79,7 @@ export default function AlarmSlider() {
             <SwiperSlide style={{ width: swiperSlideWidth }} key={option.value}>
               <Box
                 width="100%"
-                height={{base: "80px", md: "100px"}}
+                height={{ base: "80px", md: "100px" }}
                 borderRadius="10px"
                 bg={
                   option.background
@@ -96,7 +94,7 @@ export default function AlarmSlider() {
               >
                 <Center
                   width="100%"
-                  height={{base: "80px", md: "100px"}}
+                  height={{ base: "80px", md: "100px" }}
                   backdropFilter={option.background ? "brightness(0.6)" : ""}
                   borderRadius="10px"
                   border={
@@ -104,7 +102,7 @@ export default function AlarmSlider() {
                       ? "3px solid white"
                       : "1px solid black"
                   }
-                  fontSize={{base: "14px", md: "16px"}}
+                  fontSize={{ base: "14px", md: "16px" }}
                   _hover={{
                     backdropFilter: option.background ? "brightness(0.3)" : "",
                   }}
@@ -163,7 +161,7 @@ export default function AlarmSlider() {
           width="fit-content"
           leftIcon={<IconCircleX />}
           onClick={handleClose}
-          fontSize={{base: "14px", md: "16px"}}
+          fontSize={{ base: "14px", md: "16px" }}
         >
           Close
         </Button>
@@ -171,7 +169,7 @@ export default function AlarmSlider() {
           width="fit-content"
           leftIcon={<IconCircleCheck />}
           onClick={handleApply}
-          fontSize={{base: "14px", md: "16px"}}
+          fontSize={{ base: "14px", md: "16px" }}
         >
           Apply
         </Button>

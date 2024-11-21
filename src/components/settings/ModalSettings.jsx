@@ -25,15 +25,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ALARMS, FOCUS_MUSICS } from "../../helpers/constants";
 
 export default function ModalSettings({ isOpen, onClose }) {
-  const {
-    timerDuration,
-    setTimerDuration,
-    focusMusic,
-    alarm,
-    setFocusMusic,
-    setAlarm,
-    editSettings,
-  } = useSettings();
+  const { timerDuration, focusMusic, alarm, updateSettings } = useSettings();
   const [focusDuration, setFocusDuration] = useState(0);
   const [shortBreakDuration, setShortBreakDuration] = useState(0);
   const [longBreakDuration, setLongBreakDuration] = useState(0);
@@ -51,27 +43,24 @@ export default function ModalSettings({ isOpen, onClose }) {
   }, [isOpen, timerDuration, focusMusic, alarm]);
 
   const handleSave = useCallback(() => {
-    setTimerDuration({
-      "focus-time": focusDuration,
-      "short-break": shortBreakDuration,
-      "long-break": longBreakDuration,
-    });
-
-    setFocusMusic(focusMusicSelected);
-    setAlarm(alarmSelected);
-    editSettings();
+    updateSettings(
+      {
+        "focus-time": focusDuration,
+        "short-break": shortBreakDuration,
+        "long-break": longBreakDuration,
+      },
+      focusMusicSelected,
+      alarmSelected
+    );
 
     onClose();
   }, [
     alarmSelected,
-    editSettings,
+    updateSettings,
     focusDuration,
     focusMusicSelected,
     longBreakDuration,
     onClose,
-    setAlarm,
-    setFocusMusic,
-    setTimerDuration,
     shortBreakDuration,
   ]);
 

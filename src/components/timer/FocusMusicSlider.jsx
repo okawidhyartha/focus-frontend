@@ -28,8 +28,7 @@ export default function FocusMusicSlider() {
     setFocusBackgroundPreview,
     setIsVisibleFocusMusicSetting,
     focusMusic,
-    setFocusMusic,
-    editSettings,
+    updateFocusMusic,
   } = useSettings();
 
   const [previewMusic, setPreviewMusic] = useState(null);
@@ -51,7 +50,7 @@ export default function FocusMusicSlider() {
   };
 
   const handleApply = () => {
-    setFocusMusic(selected);
+    updateFocusMusic(selected);
     toast({
       title: "Focus music applied!",
       status: "success",
@@ -60,7 +59,6 @@ export default function FocusMusicSlider() {
       position: "top-right",
     });
     setIsVisibleFocusMusicSetting(false);
-    editSettings();
   };
 
   const handleClose = () => {
@@ -88,7 +86,7 @@ export default function FocusMusicSlider() {
             <SwiperSlide style={{ width: swiperSlideWidth }} key={option.value}>
               <Box
                 width="100%"
-                height={{base: "80px", md: "100px"}}
+                height={{ base: "80px", md: "100px" }}
                 borderRadius="10px"
                 bg={
                   option.background
@@ -103,7 +101,7 @@ export default function FocusMusicSlider() {
               >
                 <Center
                   width="100%"
-                  height={{base: "80px", md: "100px"}}
+                  height={{ base: "80px", md: "100px" }}
                   backdropFilter={option.background ? "brightness(0.6)" : ""}
                   borderRadius="10px"
                   border={
@@ -111,7 +109,7 @@ export default function FocusMusicSlider() {
                       ? "3px solid white"
                       : "1px solid black"
                   }
-                  fontSize={{base: "14px", md: "16px"}}
+                  fontSize={{ base: "14px", md: "16px" }}
                   _hover={{
                     backdropFilter: option.background ? "brightness(0.3)" : "",
                   }}
@@ -172,7 +170,7 @@ export default function FocusMusicSlider() {
           width="fit-content"
           leftIcon={<IconCircleX />}
           onClick={handleClose}
-          fontSize={{base: "14px", md: "16px"}}
+          fontSize={{ base: "14px", md: "16px" }}
         >
           Close
         </Button>
@@ -180,7 +178,7 @@ export default function FocusMusicSlider() {
           width="fit-content"
           leftIcon={<IconCircleCheck />}
           onClick={handleApply}
-          fontSize={{base: "14px", md: "16px"}}
+          fontSize={{ base: "14px", md: "16px" }}
         >
           Apply
         </Button>

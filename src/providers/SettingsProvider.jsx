@@ -1,4 +1,10 @@
-import { createContext, useCallback, useEffect, useLayoutEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import PropTypes from "prop-types";
 import ModalSettings from "../components/settings/ModalSettings";
 import { useDisclosure } from "@chakra-ui/react";
@@ -62,33 +68,104 @@ export default function SettingsProvider({ children }) {
     const json = await resp.json();
 
     setTimerDuration({
-      "focus-time": parseInt(json.data.pomodoro),
-      "short-break": parseInt(json.data.short),
-      "long-break": parseInt(json.data.long),
+      "focus-time": parseInt(json.data[0].pomodoro),
+      "short-break": parseInt(json.data[0].short),
+      "long-break": parseInt(json.data[0].long),
     });
 
-    setFocusMusic(json.data.backsound);
-    setAlarm(json.data.alarm);
+    setFocusMusic(json.data[0].backsound);
+    setAlarm(json.data[0].alarm);
   }, [authUsername]);
 
-  const editSettings = useCallback(async () => {
-    if (!authUsername) return;
-    const resp = await fetch(API_URL + "/setting/" + authUsername, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+  // {
+  //   pomodoro: timerDuration["focus-time"].toString(),
+  //   short: timerDuration["short-break"].toString(),
+  //   long: timerDuration["long-break"].toString(),
+  //   alarm: alarm,
+  //   backsound: focusMusic,
+  // }
+
+  const editSettings = useCallback(
+    async (settings) => {
+      if (!authUsername) return;
+      const resp = await fetch(API_URL + "/setting/" + authUsername, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (resp.ok) fetchSettings();
+    },
+    [authUsername, fetchSettings]
+  );
+
+  const updateSettings = useCallback(
+    (newDuration, newFocusMusic, newAlarm) => {
+      setTimerDuration(newDuration);
+      setFocusMusic(newFocusMusic);
+      setAlarm(newAlarm);
+      editSettings({
+        pomodoro: newDuration["focus-time"].toString(),
+        short: newDuration["short-break"].toString(),
+        long: newDuration["long-break"].toString(),
+        alarm: newAlarm,
+        backsound: newFocusMusic,
+      });
+    },
+    [editSettings]
+  );
+
+  const updateAlarm = useCallback(
+    (newAlarm) => {
+      setAlarm(newAlarm);
+      editSettings({
+        pomodoro: timerDuration["focus-time"].toString(),
+        short: timerDuration["short-break"].toString(),
+        long: timerDuration["long-break"].toString(),
+        alarm: newAlarm,
+        backsound: focusMusic,
+      });
+    },
+    [editSettings, focusMusic, timerDuration]
+  );
+
+  const updateFocusMusic = useCallback(
+    (newFocusMusic) => {
+      setFocusMusic(newFocusMusic);
+      editSettings({
         pomodoro: timerDuration["focus-time"].toString(),
         short: timerDuration["short-break"].toString(),
         long: timerDuration["long-break"].toString(),
         alarm: alarm,
-        backsound: focusMusic,
-      }),
-    });
+        backsound: newFocusMusic,
+      });
+    },
+    [alarm, editSettings, timerDuration]
+  );
 
-    if (resp.ok) fetchSettings();
-  }, [alarm, authUsername, fetchSettings, focusMusic, timerDuration]);
+  const addSettings = useCallback(
+    async (username) => {
+      const resp = await fetch(API_URL + "/setting", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          pomodoro: timerDuration["focus-time"].toString(),
+          short: timerDuration["short-break"].toString(),
+          long: timerDuration["long-break"].toString(),
+          alarm: alarm,
+          backsound: focusMusic,
+        }),
+      });
+
+      if (resp.ok) fetchSettings();
+    },
+    [alarm, fetchSettings, focusMusic, timerDuration]
+  );
 
   useEffect(() => {
     fetchSettings();
@@ -115,7 +192,10 @@ export default function SettingsProvider({ children }) {
         setFocusBackgroundPreview,
         isVisibleAlarmSetting,
         setIsVisibleAlarmSetting,
-        editSettings,
+        updateSettings,
+        addSettings,
+        updateAlarm,
+        updateFocusMusic,
       }}
     >
       {children}
