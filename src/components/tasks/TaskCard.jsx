@@ -19,7 +19,7 @@ export default function TaskCard({ task }) {
     <Box
       backgroundColor="rgba(255, 255, 255, 0.8)"
       borderRadius="8px"
-      padding={{base: "14px", md: "16px"}}
+      padding={{ base: "14px", md: "16px" }}
       width="100%"
       marginBottom="8px"
       onClick={() => selecTask(id)}
@@ -49,7 +49,12 @@ export default function TaskCard({ task }) {
         <Text fontSize={{ base: "14px", md: "16px" }}>
           {actCycle} / {estCycle}
         </Text>
-        <Button fontSize={{ base: "14px", md: "16px" }} onClick={() => setShowEdit(true)}>Edit</Button>
+        <Button
+          fontSize={{ base: "14px", md: "16px" }}
+          onClick={() => setShowEdit(true)}
+        >
+          Edit
+        </Button>
       </HStack>
     </Box>
   );
@@ -57,7 +62,7 @@ export default function TaskCard({ task }) {
 
 TaskCard.propTypes = {
   task: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     description: PropTypes.string.isRequired,
     estCycle: PropTypes.number.isRequired,
     actCycle: PropTypes.number.isRequired,

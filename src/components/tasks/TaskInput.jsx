@@ -54,9 +54,7 @@ export default function TaskInput() {
   };
 
   const handleSave = () => {
-    const id = `${new Date().getTime()}-${Math.floor(Math.random() * 1000)}`;
     addTask({
-      id,
       description: task,
       estCycle: focusCycle,
       actCycle: 0,

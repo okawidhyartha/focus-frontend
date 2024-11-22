@@ -13,6 +13,8 @@ export const API_URL = "https://capstone-pomodoro.duckdns.org";
 
 export const AUTH_USERNAME_KEY = "authUsername";
 
+export const GUEST_USERNAME = "___GUEST___";
+
 export const TIMER_OPTIONS = [
   {
     value: "focus-time",

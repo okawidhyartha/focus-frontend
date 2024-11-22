@@ -144,7 +144,7 @@ export default function TaskEdit({ task, onCancel }) {
 
 TaskEdit.propTypes = {
   task: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     description: PropTypes.string.isRequired,
     estCycle: PropTypes.number.isRequired,
     actCycle: PropTypes.number.isRequired,
