@@ -15,7 +15,7 @@ export default function ActionButton({ children, ...props }) {
       px={{ base: "20px", md: "36px" }}
       borderRadius="full"
       color={
-        (playing && focusBackground && selectedOption === "focus-time") ||
+        (playing && focusBackground && selectedOption === "focusTime") ||
         focusBackgroundPreview
           ? "black"
           : color

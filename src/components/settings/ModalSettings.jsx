@@ -34,9 +34,9 @@ export default function ModalSettings({ isOpen, onClose }) {
 
   useEffect(() => {
     if (isOpen) {
-      setFocusDuration(timerDuration["focus-time"]);
-      setShortBreakDuration(timerDuration["short-break"]);
-      setLongBreakDuration(timerDuration["long-break"]);
+      setFocusDuration(timerDuration["focusTime"]);
+      setShortBreakDuration(timerDuration["shortBreak"]);
+      setLongBreakDuration(timerDuration["longBreak"]);
       setFocusMusicSelected(focusMusic);
       setAlarmSelected(alarm);
     }
@@ -45,9 +45,9 @@ export default function ModalSettings({ isOpen, onClose }) {
   const handleSave = useCallback(() => {
     updateSettings(
       {
-        "focus-time": focusDuration,
-        "short-break": shortBreakDuration,
-        "long-break": longBreakDuration,
+        "focusTime": focusDuration,
+        "shortBreak": shortBreakDuration,
+        "longBreak": longBreakDuration,
       },
       focusMusicSelected,
       alarmSelected

@@ -7,19 +7,49 @@ import {
 } from "react";
 import PropTypes from "prop-types";
 import ModalSettings from "../components/settings/ModalSettings";
-import { useDisclosure } from "@chakra-ui/react";
+import { Toast, useDisclosure } from "@chakra-ui/react";
 import { API_URL, FOCUS_MUSICS, TIMER_OPTIONS } from "../helpers/constants";
 import { useAuth } from "../hooks/useAuth";
+import { useIndexedDB } from "react-indexed-db-hook";
+
+const editSettingsServer = async (username, settings) => {
+  const resp = await fetch(API_URL + "/setting/" + username, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(settings),
+  });
+
+  if (!resp.ok)
+    throw new Error(
+      "Something went wrong when updating your settings. Please try again."
+    );
+};
 
 export const SettingsContext = createContext(null);
 
 export default function SettingsProvider({ children }) {
   const { authUsername } = useAuth();
+  const {
+    getAll: getAllSettingsIDB,
+    add: addSettingIDB,
+    update: editSettingIDB,
+    getByID: getSettingIDB,
+  } = useIndexedDB("settings");
+
+  const {
+    deleteRecord: deleteSettingSyncUpdate,
+    getByID: getSettingSyncUpdate,
+    update: editSettingSyncUpdate,
+    add: addSettingSyncUpdate,
+  } = useIndexedDB("settingsSyncUpdate");
+
   const [fisrtOption] = TIMER_OPTIONS;
   const [timerDuration, setTimerDuration] = useState({
-    "focus-time": 25,
-    "short-break": 5,
-    "long-break": 10,
+    focusTime: 25,
+    shortBreak: 5,
+    longBreak: 10,
   });
   const [focusMusic, setFocusMusic] = useState("none");
   const [alarm, setAlarm] = useState("none");
@@ -51,54 +81,137 @@ export default function SettingsProvider({ children }) {
     }
   }, [focusMusic]);
 
-  const fetchSettings = useCallback(async () => {
+  const syncSettings = useCallback(async () => {
     if (!authUsername) return;
-    const resp = await fetch(API_URL + "/setting/" + authUsername);
+    try {
+      const settingsSyncUpdate = await getSettingSyncUpdate(authUsername);
+      if (settingsSyncUpdate) {
+        await editSettingsServer(authUsername, {
+          pomodoro: settingsSyncUpdate.focusTime,
+          short: settingsSyncUpdate.shortBreak,
+          long: settingsSyncUpdate.longBreak,
+          alarm: settingsSyncUpdate.alarm,
+          backsound: settingsSyncUpdate.alarm,
+        });
+      }
 
-    if (!resp.ok) {
+      await deleteSettingSyncUpdate(authUsername);
+
+      const resp = await fetch(API_URL + "/setting/" + authUsername);
+      const json = await resp.json();
+      const settingsServer = json.data[0];
+      const settingsLocal = await getSettingIDB(authUsername);
+      if (settingsLocal) {
+        addSettingIDB({
+          username: authUsername,
+          focusTime: settingsServer.pomodoro,
+          shortBreak: settingsServer.short,
+          longBreak: settingsServer.longBreak,
+          focusMusic: settingsServer.backsound,
+          alarm: settingsServer.alarm,
+        });
+      } else {
+        editSettingIDB({
+          username: authUsername,
+          focusTime: settingsServer.pomodoro,
+          shortBreak: settingsServer.short,
+          longBreak: settingsServer.longBreak,
+          focusMusic: settingsServer.backsound,
+          alarm: settingsServer.alarm,
+        });
+      }
+
       setTimerDuration({
-        "focus-time": 25,
-        "short-break": 5,
-        "long-break": 10,
+        focusTime: parseInt(settingsServer.pomodoro),
+        shortBreak: parseInt(settingsServer.short),
+        longBreak: parseInt(settingsServer.long),
+      });
+
+      setFocusMusic(settingsServer.backsound);
+      setAlarm(settingsServer.alarm);
+    } catch {
+      return;
+    }
+  }, [
+    addSettingIDB,
+    authUsername,
+    deleteSettingSyncUpdate,
+    editSettingIDB,
+    getSettingIDB,
+    getSettingSyncUpdate,
+  ]);
+
+  const fetchSettings = useCallback(async () => {
+    const settings = await getAllSettingsIDB();
+    const settingsLocal = settings.find(
+      (setting) => setting.username === authUsername
+    );
+
+    if (!settingsLocal) {
+      setTimerDuration({
+        focusTime: 25,
+        shortBreak: 5,
+        longBreak: 10,
       });
       setFocusMusic("none");
       setAlarm("none");
+    } else {
+      setTimerDuration({
+        focusTime: parseInt(settingsLocal.focusTime),
+        shortBreak: parseInt(settingsLocal.shortBreak),
+        longBreak: parseInt(settingsLocal.longBreak),
+      });
+
+      setFocusMusic(settingsLocal.focusMusic);
+      setAlarm(settingsLocal.alarm);
     }
-
-    const json = await resp.json();
-
-    setTimerDuration({
-      "focus-time": parseInt(json.data[0].pomodoro),
-      "short-break": parseInt(json.data[0].short),
-      "long-break": parseInt(json.data[0].long),
-    });
-
-    setFocusMusic(json.data[0].backsound);
-    setAlarm(json.data[0].alarm);
-  }, [authUsername]);
-
-  // {
-  //   pomodoro: timerDuration["focus-time"].toString(),
-  //   short: timerDuration["short-break"].toString(),
-  //   long: timerDuration["long-break"].toString(),
-  //   alarm: alarm,
-  //   backsound: focusMusic,
-  // }
+  }, [authUsername, getAllSettingsIDB]);
 
   const editSettings = useCallback(
     async (settings) => {
       if (!authUsername) return;
-      const resp = await fetch(API_URL + "/setting/" + authUsername, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(settings),
-      });
 
-      if (resp.ok) fetchSettings();
+      const newLocalData = {
+        username: authUsername,
+        focusTime: settings.pomodoro,
+        shortBreak: settings.short,
+        longBreak: settings.long,
+        focusMusic: settings.backsound,
+        alarm: settings.alarm,
+      };
+
+      try {
+        await editSettingsServer(authUsername, settings);
+      } catch (error) {
+        if (navigator.onLine) {
+          Toast({
+            title: "Error updating setting",
+            description: error.message,
+            status: "error",
+            duration: 2000,
+            isClosable: true,
+            position: "top-right",
+          });
+          return;
+        } else {
+          const syncData = await getSettingSyncUpdate(authUsername);
+          if (syncData) await editSettingSyncUpdate(newLocalData);
+          else await addSettingSyncUpdate(newLocalData);
+        }
+      }
+
+      await editSettingIDB(newLocalData);
+
+      syncSettings();
     },
-    [authUsername, fetchSettings]
+    [
+      addSettingSyncUpdate,
+      authUsername,
+      editSettingIDB,
+      editSettingSyncUpdate,
+      getSettingSyncUpdate,
+      syncSettings,
+    ]
   );
 
   const updateSettings = useCallback(
@@ -107,9 +220,9 @@ export default function SettingsProvider({ children }) {
       setFocusMusic(newFocusMusic);
       setAlarm(newAlarm);
       editSettings({
-        pomodoro: newDuration["focus-time"].toString(),
-        short: newDuration["short-break"].toString(),
-        long: newDuration["long-break"].toString(),
+        pomodoro: newDuration["focusTime"].toString(),
+        short: newDuration["shortBreak"].toString(),
+        long: newDuration["longBreak"].toString(),
         alarm: newAlarm,
         backsound: newFocusMusic,
       });
@@ -121,9 +234,9 @@ export default function SettingsProvider({ children }) {
     (newAlarm) => {
       setAlarm(newAlarm);
       editSettings({
-        pomodoro: timerDuration["focus-time"].toString(),
-        short: timerDuration["short-break"].toString(),
-        long: timerDuration["long-break"].toString(),
+        pomodoro: timerDuration["focusTime"].toString(),
+        short: timerDuration["shortBreak"].toString(),
+        long: timerDuration["longBreak"].toString(),
         alarm: newAlarm,
         backsound: focusMusic,
       });
@@ -135,9 +248,9 @@ export default function SettingsProvider({ children }) {
     (newFocusMusic) => {
       setFocusMusic(newFocusMusic);
       editSettings({
-        pomodoro: timerDuration["focus-time"].toString(),
-        short: timerDuration["short-break"].toString(),
-        long: timerDuration["long-break"].toString(),
+        pomodoro: timerDuration["focusTime"].toString(),
+        short: timerDuration["shortBreak"].toString(),
+        long: timerDuration["longBreak"].toString(),
         alarm: alarm,
         backsound: newFocusMusic,
       });
@@ -154,9 +267,9 @@ export default function SettingsProvider({ children }) {
         },
         body: JSON.stringify({
           username,
-          pomodoro: timerDuration["focus-time"].toString(),
-          short: timerDuration["short-break"].toString(),
-          long: timerDuration["long-break"].toString(),
+          pomodoro: timerDuration["focusTime"].toString(),
+          short: timerDuration["shortBreak"].toString(),
+          long: timerDuration["longBreak"].toString(),
           alarm: alarm,
           backsound: focusMusic,
         }),

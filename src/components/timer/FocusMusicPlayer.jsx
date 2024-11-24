@@ -25,7 +25,7 @@ export default function FocusMusicPlayer() {
     <Box display="none">
       <ReactPlayer
         url={musicFile}
-        playing={playing && selectedOption === "focus-time"}
+        playing={playing && selectedOption === "focusTime"}
         playsinline
         loop
         onReady={setPlayer}

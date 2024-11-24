@@ -22,7 +22,7 @@ export default function TimerPage() {
   return (
     <Box
       backgroundColor={
-        (focusBackground && playing && selectedOption === "focus-time") ||
+        (focusBackground && playing && selectedOption === "focusTime") ||
         focusBackgroundPreview
           ? "black"
           : color
@@ -41,7 +41,7 @@ export default function TimerPage() {
             : ""
         }
         opacity={
-          focusBackground && playing && selectedOption === "focus-time" ? 1 : 0
+          focusBackground && playing && selectedOption === "focusTime" ? 1 : 0
         }
         backgroundSize="cover"
         transition="opacity 1s, background-image 1s"

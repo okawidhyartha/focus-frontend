@@ -1,8 +1,9 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { API_URL, GUEST_USERNAME } from "../helpers/constants";
 import { useAuth } from "../hooks/useAuth";
 import { useIndexedDB } from "react-indexed-db-hook";
+import { useToast } from "@chakra-ui/react";
 
 export const TasksContext = createContext(null);
 
@@ -54,6 +55,9 @@ const addTaskServer = async (task) => {
 };
 
 export default function TasksProvider({ children }) {
+  const toast = useToast();
+  const toastSyncRef = useRef();
+
   const {
     getAll: getAllTasksIDB,
     add: addTaskIDB,
@@ -140,6 +144,12 @@ export default function TasksProvider({ children }) {
       return;
 
     setSyncing(true);
+    toastSyncRef.current = toast({
+      title: "Syncing tasks...",
+      status: "loading",
+      isClosable: false,
+      position: "top-right",
+    });
 
     const tasksSyncUpdate = await getAllTasksSyncUpdate();
     const promisesUpdate = tasksSyncUpdate.map((task) =>
@@ -157,7 +167,16 @@ export default function TasksProvider({ children }) {
         return true;
       }
     });
-    if (isAnyUpdateRejected) return;
+    if (isAnyUpdateRejected) {
+      toast({
+        title: "Error syncing tasks: some tasks could not be updated",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
 
     const tasksSyncDelete = await getAllTasksSyncDelete();
     const promisesDelete = tasksSyncDelete.map((task) =>
@@ -169,7 +188,16 @@ export default function TasksProvider({ children }) {
         return true;
       }
     });
-    if (isAnyDeleteRejected) return;
+    if (isAnyDeleteRejected) {
+      toast({
+        title: "Error syncing tasks: some tasks could not be deleted",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
 
     const fetchServer = fetch(API_URL + "/tasks/" + authUsername);
     const fetchLocal = getAllTasksIDB();
@@ -178,7 +206,16 @@ export default function TasksProvider({ children }) {
       fetchLocal,
     ]);
 
-    if (!respServer.ok) return;
+    if (!respServer.ok) {
+      toast({
+        title: "Error syncing tasks: could not fetch tasks from server",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
 
     const { data: tasksServer } = await respServer.json();
 
@@ -210,7 +247,16 @@ export default function TasksProvider({ children }) {
         return true;
       }
     });
-    if (isAnyAddRejected) return;
+    if (isAnyAddRejected) {
+      toast({
+        title: "Error syncing tasks: some tasks could not be added",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
 
     for (let index = 0; index < resultsAdd.length; index++) {
       const resultAdd = resultsAdd[index];
@@ -242,9 +288,9 @@ export default function TasksProvider({ children }) {
       username: authUsername,
     }));
 
-    addTasksIDB(taskServerNotInLocalFormated);
-    deleteTasksIDB(taskToDeleteOnLocal.map((task) => task.id));
-    updateTasksIDB(
+    await addTasksIDB(taskServerNotInLocalFormated);
+    await deleteTasksIDB(taskToDeleteOnLocal.map((task) => task.id));
+    await updateTasksIDB(
       taskToUpdateOnLocal.map((task) => ({
         id: task.id,
         description: task.task_name,
@@ -260,7 +306,25 @@ export default function TasksProvider({ children }) {
     setTasks(allTasksSynced);
 
     setSyncing(false);
-  }, [addTaskIDB, addTasksIDB, adding, authUsername, deleteTaskIDB, deleteTaskSync, deleteTasksIDB, deleting, editTaskSync, getAllTasksIDB, getAllTasksSyncDelete, getAllTasksSyncUpdate, syncing, updateTasksIDB, updating]);
+    toast.close(toastSyncRef.current);
+  }, [
+    addTaskIDB,
+    addTasksIDB,
+    adding,
+    authUsername,
+    deleteTaskIDB,
+    deleteTaskSync,
+    deleteTasksIDB,
+    deleting,
+    editTaskSync,
+    getAllTasksIDB,
+    getAllTasksSyncDelete,
+    getAllTasksSyncUpdate,
+    syncing,
+    toast,
+    updateTasksIDB,
+    updating,
+  ]);
 
   const syncInitialTasks = useCallback(
     async (tasks) => {
@@ -381,7 +445,14 @@ export default function TasksProvider({ children }) {
           taskId = task_id;
         } catch (error) {
           if (navigator.onLine) {
-            // TODO: show error message
+            toast({
+              title: "Error adding task",
+              description: error.message,
+              status: "error",
+              duration: 2000,
+              isClosable: true,
+              position: "top-right",
+            });
             setAdding(false);
             return;
           }
@@ -401,7 +472,7 @@ export default function TasksProvider({ children }) {
       setAdding(false);
       syncTasks();
     },
-    [addTaskIDB, authUsername, syncTasks]
+    [addTaskIDB, authUsername, syncTasks, toast]
   );
 
   const selecTask = useCallback(
@@ -429,7 +500,14 @@ export default function TasksProvider({ children }) {
           await deleteTaskSyncUpdate(task.id);
         } catch (error) {
           if (navigator.onLine) {
-            // TODO: show error message
+            toast({
+              title: "Error updating task",
+              description: error.message,
+              status: "error",
+              duration: 2000,
+              isClosable: true,
+              position: "top-right",
+            });
             setUpdating(false);
             return;
           } else {
@@ -461,6 +539,7 @@ export default function TasksProvider({ children }) {
       editTaskSyncUpdate,
       getTaskSyncUpdate,
       syncTasks,
+      toast,
     ]
   );
 
@@ -479,7 +558,14 @@ export default function TasksProvider({ children }) {
           await deleteTaskServer(id);
         } catch (error) {
           if (navigator.onLine) {
-            // TODO: show error message
+            toast({
+              title: "Error deleting task",
+              description: error.message,
+              status: "error",
+              duration: 2000,
+              isClosable: true,
+              position: "top-right",
+            });
             setDeleting(false);
             return;
           } else {
@@ -509,6 +595,7 @@ export default function TasksProvider({ children }) {
       deleteTaskSyncUpdate,
       getTaskSyncDelete,
       syncTasks,
+      toast,
     ]
   );
 
@@ -522,14 +609,32 @@ export default function TasksProvider({ children }) {
     await editTask(newSelectedTask);
   }, [editTask, selectedTask]);
 
+  const handleOffline = useCallback(() => {
+    toast({
+      title: (
+        <>
+          You are seem to be offline, <br />
+          but we got you covered! 😉
+        </>
+      ),
+      status: "warning",
+      duration: 3000,
+      isClosable: true,
+      position: "top-right",
+      size: "sm",
+    });
+  }, [toast]);
+
   useEffect(() => {
     window.addEventListener("online", syncTasks);
+    window.addEventListener("offline", handleOffline);
     window.addEventListener("focus", syncTasks);
     return () => {
       window.removeEventListener("online", syncTasks);
+      window.removeEventListener("offline", handleOffline);
       window.removeEventListener("focus", syncTasks);
     };
-  }, [syncTasks]);
+  }, [handleOffline, syncTasks]);
 
   return (
     <TasksContext.Provider

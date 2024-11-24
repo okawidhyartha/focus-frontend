@@ -24,7 +24,7 @@ export default function TimerActions() {
 
   const handleSkipClick = () => {
     setPlaying(false);
-    if (selectedOption === "focus-time") increaseActCycle();
+    if (selectedOption === "focusTime") increaseActCycle();
     setNextOption();
     setPlayingAlarm(true);
   };

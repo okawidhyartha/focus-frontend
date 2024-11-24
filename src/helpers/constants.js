@@ -17,21 +17,21 @@ export const GUEST_USERNAME = "___GUEST___";
 
 export const TIMER_OPTIONS = [
   {
-    value: "focus-time",
+    value: "focusTime",
     name: "Focus Time",
     // minutes: 25,
     minutes: 0.1,
     color: "#E9BE61",
   },
   {
-    value: "short-break",
+    value: "shortBreak",
     name: "Short Break",
     // minutes: 5,
     minutes: 0.1,
     color: "#70BACA",
   },
   {
-    value: "long-break",
+    value: "longBreak",
     name: "Long Break",
     // minutes: 15,
     minutes: 0.1,
@@ -40,14 +40,14 @@ export const TIMER_OPTIONS = [
 ];
 
 export const TIMER_ORDER = [
-  "focus-time",
-  "short-break",
-  "focus-time",
-  "short-break",
-  "focus-time",
-  "short-break",
-  "focus-time",
-  "long-break",
+  "focusTime",
+  "shortBreak",
+  "focusTime",
+  "shortBreak",
+  "focusTime",
+  "shortBreak",
+  "focusTime",
+  "longBreak",
 ];
 
 export const FOCUS_MUSICS = [

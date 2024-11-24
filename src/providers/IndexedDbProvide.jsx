@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 const DBConfig = {
   name: "FocusSphereDB",
-  version: 1,
+  version: 3,
   objectStoresMeta: [
     {
       store: "tasks",
@@ -74,6 +74,68 @@ const DBConfig = {
         {
           name: "username",
           keypath: "username",
+          options: { unique: false },
+        },
+      ],
+    },
+    {
+      store: "settings",
+      storeConfig: { keyPath: "username" },
+      storeSchema: [
+        {
+          name: "focusTime",
+          keypath: "focusTime",
+          options: { unique: false },
+        },
+        {
+          name: "shortBreak",
+          keypath: "shortBreak",
+          options: { unique: false },
+        },
+        {
+          name: "longBreak",
+          keypath: "longBreak",
+          options: { unique: false },
+        },
+        {
+          name: "focusMusic",
+          keypath: "focusMusic",
+          options: { unique: false },
+        },
+        {
+          name: "alarm",
+          keypath: "alarm",
+          options: { unique: false },
+        },
+      ],
+    },
+    {
+      store: "settingsSyncUpdate",
+      storeConfig: { keyPath: "username" },
+      storeSchema: [
+        {
+          name: "focusTime",
+          keypath: "focusTime",
+          options: { unique: false },
+        },
+        {
+          name: "shortBreak",
+          keypath: "shortBreak",
+          options: { unique: false },
+        },
+        {
+          name: "longBreak",
+          keypath: "longBreak",
+          options: { unique: false },
+        },
+        {
+          name: "focusMusic",
+          keypath: "focusMusic",
+          options: { unique: false },
+        },
+        {
+          name: "alarm",
+          keypath: "alarm",
           options: { unique: false },
         },
       ],
