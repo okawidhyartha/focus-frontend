@@ -1,14 +1,3 @@
-import RainMusic from "../assets/audios/rain-143417.mp3";
-import RainBackground from "../assets/images/rain-background.webp";
-import ThinkingPianoMusic from "../assets/audios/thinking-piano-music-ambience-225272.mp3";
-import ThinkingPianoBackground from "../assets/images/piano-background.webp";
-import LofiFocusMusic from "../assets/audios/satisfying-lofi-for-focus-study-amp-working-242103.mp3";
-import LofiFocusBackground from "../assets/images/lofi-background.webp";
-import AfternoonCoffeeMusic from "../assets/audios/afternoon-coffee-139847.mp3";
-import AfternoonCoffeeBackground from "../assets/images/afternoon-coffee-background.webp";
-import AlarmBellHand from "../assets/audios/alarm-bell-hand.wav";
-import AlarmBellBackground from "../assets/images/counter-bell-background.webp";
-
 export const API_URL = "https://capstone-pomodoro.duckdns.org";
 
 export const AUTH_USERNAME_KEY = "authUsername";
@@ -60,26 +49,26 @@ export const FOCUS_MUSICS = [
   {
     name: "Rain",
     value: "rain",
-    audio: RainMusic,
-    background: RainBackground,
+    audio: "/audios/rain-143417.mp3",
+    background: "/images/rain-background.webp",
   },
   {
     name: "Thinking Piano",
     value: "thinking-piano",
-    audio: ThinkingPianoMusic,
-    background: ThinkingPianoBackground,
+    audio: "/audios/thinking-piano-music-ambience-225272.mp3",
+    background: "/images/piano-background.webp",
   },
   {
     name: "Lo-fi Focus",
     value: "lo-fi-focus",
-    audio: LofiFocusMusic,
-    background: LofiFocusBackground,
+    audio: "/audios/satisfying-lofi-for-focus-study-amp-working-242103.mp3",
+    background: "/images/lofi-background.webp",
   },
   {
     name: "Afternoon Coffee",
     value: "afternoon-coffee",
-    audio: AfternoonCoffeeMusic,
-    background: AfternoonCoffeeBackground,
+    audio: "/audios/afternoon-coffee-139847.mp3",
+    background: "/images/afternoon-coffee-background.webp",
   },
 ];
 
@@ -93,7 +82,7 @@ export const ALARMS = [
   {
     name: "Counter Bell",
     value: "counter-bell",
-    audio: AlarmBellHand,
-    background: AlarmBellBackground,
+    audio: "/audios/alarm-bell-hand.wav",
+    background: "/images/counter-bell-background.webp",
   },
 ];
