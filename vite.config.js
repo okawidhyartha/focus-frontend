@@ -42,6 +42,32 @@ export default defineConfig({
             purpose: "maskable",
           },
         ],
+        screenshots: [
+          {
+            src: "/screenshots/narrow-1.jpg",
+            sizes: "1080x1920",
+            type: "image/jpg",
+            form_factor: "narrow",
+          },
+          {
+            src: "/screenshots/narrow-2.jpg",
+            sizes: "1080x1920",
+            type: "image/jpg",
+            form_factor: "narrow",
+          },
+          {
+            src: "/screenshots/wide-1.jpg",
+            sizes: "1920x1920",
+            type: "image/jpg",
+            form_factor: "wide",
+          },
+          {
+            src: "/screenshots/wide-2.jpg",
+            sizes: "1920x1920",
+            type: "image/jpg",
+            form_factor: "wide",
+          },
+        ],
       },
     }),
   ],
