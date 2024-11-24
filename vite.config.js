@@ -8,14 +8,40 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      devOptions: {
-        enabled: true,
-      },
       workbox: {
         globPatterns: [
           "**/*.{js,css,html,ico,png,svg,json,mp3,webp,woff2,woff,wav}",
         ],
         maximumFileSizeToCacheInBytes: 10000000,
+      },
+      manifest: {
+        name: "Focus Sphere",
+        short_name: "Focus Sphere",
+        description: "Focus your mind be more productive",
+        theme_color: "#E9BE61",
+        icons: [
+          {
+            src: "pwa-64x64.png",
+            sizes: "64x64",
+            type: "image/png",
+          },
+          {
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
       },
     }),
   ],
