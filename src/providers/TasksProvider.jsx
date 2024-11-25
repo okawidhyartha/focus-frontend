@@ -7,7 +7,7 @@ import { useToast } from "@chakra-ui/react";
 
 export const TasksContext = createContext(null);
 
-const checkIsIdLocal = (id) => String(id).startsWith("GO-");
+const isIdLocal = (id) => String(id).startsWith("GO-");
 
 const editTaskServer = async (id, task) => {
   const resp = await fetch(API_URL + "/task/" + id, {
@@ -18,7 +18,7 @@ const editTaskServer = async (id, task) => {
     body: JSON.stringify(task),
   });
 
-  if (!resp.ok)
+  if (!resp.ok && resp.status !== 404)
     throw new Error(
       "Something went wrong when updating your task. Please try again."
     );
@@ -29,7 +29,7 @@ const deleteTaskServer = async (id) => {
     method: "DELETE",
   });
 
-  if (!resp.ok)
+  if (!resp.ok && resp.status !== 404)
     throw new Error(
       "Something went wrong when deleting your task. Please try again."
     );
@@ -54,6 +54,22 @@ const addTaskServer = async (task) => {
   return data;
 };
 
+const fetchTasksServer = async (username) => {
+  const resp = await fetch(API_URL + "/tasks/" + username);
+
+  if (!resp.ok) {
+    if (resp.status === 404) return [];
+    else
+      throw new Error(
+        "Something went wrong when fetching your tasks. Please try again."
+      );
+  }
+
+  const { data } = await resp.json();
+
+  return data;
+};
+
 export default function TasksProvider({ children }) {
   const toast = useToast();
   const toastSyncRef = useRef();
@@ -63,24 +79,9 @@ export default function TasksProvider({ children }) {
     add: addTaskIDB,
     update: editTaskIDB,
     deleteRecord: deleteTaskIDB,
-    clear: clearTasksIDB,
+    getByID: getTaskIDB,
   } = useIndexedDB("tasks");
   const [syncing, setSyncing] = useState(false);
-
-  const {
-    getAll: getAllTasksSyncUpdate,
-    deleteRecord: deleteTaskSyncUpdate,
-    getByID: getTaskSyncUpdate,
-    update: editTaskSyncUpdate,
-    add: addTaskSyncUpdate,
-  } = useIndexedDB("tasksSyncUpdate");
-
-  const {
-    getAll: getAllTasksSyncDelete,
-    deleteRecord: deleteTaskSyncDelete,
-    getByID: getTaskSyncDelete,
-    add: addTaskSyncDelete,
-  } = useIndexedDB("tasksSyncDelete");
 
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState();
@@ -89,60 +90,7 @@ export default function TasksProvider({ children }) {
   const [deleting, setDeleting] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  const editTaskSync = useCallback(
-    async (id, task) => {
-      await editTaskServer(id, task);
-      await deleteTaskSyncUpdate(id);
-    },
-    [deleteTaskSyncUpdate]
-  );
-
-  const deleteTaskSync = useCallback(
-    async (id) => {
-      await deleteTaskServer(id);
-      await deleteTaskSyncDelete(id);
-    },
-    [deleteTaskSyncDelete]
-  );
-
-  const addTasksIDB = useCallback(
-    async (tasks) => {
-      for (const task of tasks) {
-        await addTaskIDB(task);
-      }
-    },
-    [addTaskIDB]
-  );
-
-  const updateTasksIDB = useCallback(
-    async (tasks) => {
-      for (const task of tasks) {
-        await editTaskIDB(task);
-      }
-    },
-    [editTaskIDB]
-  );
-
-  const deleteTasksIDB = useCallback(
-    async (ids) => {
-      for (const id of ids) {
-        await deleteTaskIDB(id);
-      }
-    },
-    [deleteTaskIDB]
-  );
-
   const syncTasks = useCallback(async () => {
-    if (
-      !navigator.onLine ||
-      !authUsername ||
-      syncing ||
-      updating ||
-      deleting ||
-      adding
-    )
-      return;
-
     setSyncing(true);
     toastSyncRef.current = toast({
       title: "Syncing tasks...",
@@ -151,190 +99,161 @@ export default function TasksProvider({ children }) {
       position: "top-right",
     });
 
-    const tasksSyncUpdate = await getAllTasksSyncUpdate();
-    const promisesUpdate = tasksSyncUpdate.map((task) =>
-      editTaskSync(task.id, {
-        username: authUsername,
-        task_name: task.description,
-        target_cycle: task.estCycle,
-        actual_cycle: task.actCycle,
-        complete_status: task.done,
-      })
-    );
-    const resultsUpdate = await Promise.allSettled(promisesUpdate);
-    const isAnyUpdateRejected = resultsUpdate.some((result) => {
-      if (result.status === "rejected") {
-        return true;
+    try {
+      const localTasks = (await getAllTasksIDB()).filter(
+        (task) => task.username === authUsername
+      );
+
+      const tasksToDelete = localTasks.filter(
+        (task) => task.localDeleted && !isIdLocal(task.id)
+      );
+
+      for (const task of tasksToDelete) {
+        try {
+          await deleteTaskServer(task.id);
+          await deleteTaskIDB(task.id);
+        } catch {
+          throw new Error(
+            "Error syncing tasks: some tasks could not be deleted"
+          );
+        }
       }
-    });
-    if (isAnyUpdateRejected) {
+
+      const tasksToUpdate = localTasks.filter(
+        (task) => !task.synced && !isIdLocal(task.id)
+      );
+
+      for (const task of tasksToUpdate) {
+        try {
+          await editTaskServer(task.id, {
+            username: authUsername,
+            task_name: task.description,
+            target_cycle: task.estCycle,
+            actual_cycle: task.actCycle,
+            complete_status: task.done,
+          });
+          await editTaskIDB({ ...task, username: authUsername, synced: true });
+        } catch {
+          throw new Error(
+            "Error syncing tasks: some tasks could not be updated"
+          );
+        }
+      }
+
+      const tasksToAdd = localTasks.filter(
+        (task) => !task.synced && isIdLocal(task.id)
+      );
+
+      for (const task of tasksToAdd) {
+        try {
+          const respData = await addTaskServer({
+            username: authUsername,
+            task_name: task.description,
+            target_cycle: task.estCycle,
+          });
+
+          await deleteTaskIDB(task.id);
+
+          await addTaskIDB({
+            id: respData.task_id,
+            username: authUsername,
+            description: task.description,
+            estCycle: task.estCycle,
+            actCycle: task.actCycle,
+            done: task.done,
+            synced: true,
+          });
+        } catch {
+          throw new Error("Error syncing tasks: some tasks could not be added");
+        }
+      }
+
+      try {
+        const tasksServer = await fetchTasksServer(authUsername);
+
+        for (const task of tasksServer) {
+          await editTaskIDB({
+            id: task.id,
+            username: authUsername,
+            description: task.task_name,
+            estCycle: task.target_cycle,
+            actCycle: task.actual_cycle,
+            done: task.complete_status,
+            synced: true,
+          });
+        }
+
+        setTasks(
+          tasksServer.map((task) => ({
+            id: task.id,
+            description: task.task_name,
+            estCycle: task.target_cycle,
+            actCycle: task.actual_cycle,
+            done: task.complete_status,
+          }))
+        );
+      } catch {
+        throw new Error(
+          "Error syncing tasks: could not fetch tasks from server"
+        );
+      }
+    } catch (error) {
       toast({
-        title: "Error syncing tasks: some tasks could not be updated",
+        title: error.message,
         status: "error",
         duration: 2000,
         isClosable: true,
         position: "top-right",
       });
-      return;
     }
-
-    const tasksSyncDelete = await getAllTasksSyncDelete();
-    const promisesDelete = tasksSyncDelete.map((task) =>
-      deleteTaskSync(task.id)
-    );
-    const resultsDelete = await Promise.allSettled(promisesDelete);
-    const isAnyDeleteRejected = resultsDelete.some((result) => {
-      if (result.status === "rejected") {
-        return true;
-      }
-    });
-    if (isAnyDeleteRejected) {
-      toast({
-        title: "Error syncing tasks: some tasks could not be deleted",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-
-    const fetchServer = fetch(API_URL + "/tasks/" + authUsername);
-    const fetchLocal = getAllTasksIDB();
-    const [respServer, tasksLocal] = await Promise.all([
-      fetchServer,
-      fetchLocal,
-    ]);
-
-    if (!respServer.ok) {
-      toast({
-        title: "Error syncing tasks: could not fetch tasks from server",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-
-    const { data: tasksServer } = await respServer.json();
-
-    const taskLocalNotInServer = tasksLocal.filter(
-      (task) =>
-        checkIsIdLocal(task.id) && !tasksServer.some((t) => t.id === task.id)
-    );
-
-    const taskToDeleteOnLocal = tasksLocal.filter(
-      (task) =>
-        !checkIsIdLocal(task.id) && !tasksServer.some((t) => t.id === task.id)
-    );
-
-    const taskToUpdateOnLocal = tasksServer.filter((task) =>
-      tasksLocal.some((t) => t.id === task.id)
-    );
-
-    const promisesAdd = taskLocalNotInServer.map((task) =>
-      addTaskServer({
-        username: authUsername,
-        task_name: task.description,
-        target_cycle: task.estCycle,
-      })
-    );
-
-    const resultsAdd = await Promise.allSettled(promisesAdd);
-    const isAnyAddRejected = resultsAdd.some((result) => {
-      if (result.status === "rejected") {
-        return true;
-      }
-    });
-    if (isAnyAddRejected) {
-      toast({
-        title: "Error syncing tasks: some tasks could not be added",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-
-    for (let index = 0; index < resultsAdd.length; index++) {
-      const resultAdd = resultsAdd[index];
-      if (resultAdd.status === "fulfilled") {
-        const { task_id } = resultAdd.value;
-        const task = taskLocalNotInServer[index];
-        await deleteTaskIDB(task.id);
-        await addTaskIDB({
-          id: task_id,
-          username: authUsername,
-          description: task.description,
-          estCycle: task.estCycle,
-          actCycle: task.actCycle,
-          done: task.done,
-        });
-      }
-    }
-
-    const taskServerNotInLocal = tasksServer.filter(
-      (task) => !tasksLocal.some((t) => t.id === task.id)
-    );
-
-    const taskServerNotInLocalFormated = taskServerNotInLocal.map((task) => ({
-      id: task.id,
-      description: task.task_name,
-      estCycle: task.target_cycle,
-      actCycle: task.actual_cycle,
-      done: task.complete_status,
-      username: authUsername,
-    }));
-
-    await addTasksIDB(taskServerNotInLocalFormated);
-    await deleteTasksIDB(taskToDeleteOnLocal.map((task) => task.id));
-    await updateTasksIDB(
-      taskToUpdateOnLocal.map((task) => ({
-        id: task.id,
-        description: task.task_name,
-        estCycle: task.target_cycle,
-        actCycle: task.actual_cycle,
-        done: task.complete_status,
-        username: authUsername,
-      }))
-    );
-
-    const allTasksSynced = await getAllTasksIDB();
-
-    setTasks(allTasksSynced);
 
     setSyncing(false);
     toast.close(toastSyncRef.current);
   }, [
     addTaskIDB,
-    addTasksIDB,
-    adding,
     authUsername,
     deleteTaskIDB,
-    deleteTaskSync,
-    deleteTasksIDB,
-    deleting,
-    editTaskSync,
+    editTaskIDB,
     getAllTasksIDB,
-    getAllTasksSyncDelete,
-    getAllTasksSyncUpdate,
-    syncing,
     toast,
-    updateTasksIDB,
-    updating,
   ]);
 
-  const syncInitialTasks = useCallback(
-    async (tasks) => {
-      const newTasks = tasks.filter((task) => task.username === GUEST_USERNAME);
+  const fetchTasks = useCallback(async () => {
+    const username = authUsername ?? GUEST_USERNAME;
+    const localTasks = (await getAllTasksIDB()).filter(
+      (task) => task.username === username
+    );
 
-      for (const task of newTasks) {
-        /* 
-        Create a new task in the server and update the task with the new id
-        */
-        const { task_id } = await addTaskServer({
+    setTasks(
+      localTasks.map((task) => ({
+        id: task.id,
+        description: task.description,
+        estCycle: task.estCycle,
+        actCycle: task.actCycle,
+        done: task.done,
+      }))
+    );
+
+    if (authUsername && navigator.onLine) syncTasks();
+  }, [authUsername, getAllTasksIDB, syncTasks]);
+
+  const syncAfterSignUp = useCallback(async () => {
+    setSyncing(true);
+    toastSyncRef.current = toast({
+      title: "Syncing tasks...",
+      status: "loading",
+      isClosable: false,
+      position: "top-right",
+    });
+
+    const localGuestTasks = (await getAllTasksIDB()).filter(
+      (task) => task.username === GUEST_USERNAME
+    );
+
+    for (const task of localGuestTasks) {
+      try {
+        task.username = authUsername;
+        const resp = await addTaskServer({
           username: authUsername,
           task_name: task.description,
           target_cycle: task.estCycle,
@@ -342,89 +261,32 @@ export default function TasksProvider({ children }) {
 
         await deleteTaskIDB(task.id);
 
-        await addTaskIDB({
-          id: task_id,
-          username: authUsername,
-          description: task.description,
-          estCycle: task.estCycle,
-          actCycle: task.actCycle,
-          done: task.done,
+        await addTaskIDB({ id: resp.task_id, ...task });
+      } catch (error) {
+        toast({
+          title: error.message,
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top-right",
         });
-
-        const respEdit = await fetch(API_URL + "/task/" + task_id, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: authUsername,
-            task_name: task.description,
-            target_cycle: task.estCycle,
-            actual_cycle: task.actCycle,
-            complete_status: task.done,
-          }),
-        });
-
-        if (!respEdit.ok) {
-          // TODO: create sync queue to retry later
-        }
+        break;
       }
-    },
-    [addTaskIDB, authUsername, deleteTaskIDB]
-  );
-
-  const initialFetchTasks = useCallback(async () => {
-    if (!authUsername) return;
-    const resp = await fetch(API_URL + "/tasks/" + authUsername);
-    const tasksIDB = await getAllTasksIDB();
-
-    if (!resp.ok) {
-      if (resp.status === 404) {
-        /* 
-        if users is new, sync the guest tasks with the server
-        */
-        const guestTasks = tasksIDB.filter(
-          (task) => task.username === GUEST_USERNAME
-        );
-        setTasks(guestTasks);
-        syncInitialTasks(guestTasks);
-      } else {
-        // TODO: show error message
-        return;
-      }
-    } else {
-      /* 
-      if user is already registered, fetch the tasks from the server
-      and remove all taks from indexedDB
-      */
-      const json = await resp.json();
-
-      const formatedTasks = json.data
-        .map((task) => ({
-          id: task.id,
-          description: task.task_name,
-          estCycle: task.target_cycle,
-          actCycle: task.actual_cycle,
-          done: task.complete_status,
-          username: authUsername,
-        }))
-        .sort((a, b) => a.id - b.id);
-
-      setTasks(formatedTasks);
-      clearTasksIDB();
-      addTasksIDB(formatedTasks);
     }
-  }, [
-    addTasksIDB,
-    authUsername,
-    clearTasksIDB,
-    getAllTasksIDB,
-    syncInitialTasks,
-  ]);
 
-  useEffect(() => {
-    initialFetchTasks();
-  }, [initialFetchTasks]);
+    setTasks(
+      localGuestTasks.map((task) => ({
+        id: task.id,
+        description: task.description,
+        estCycle: task.estCycle,
+        actCycle: task.actCycle,
+        done: task.done,
+      }))
+    );
+
+    setSyncing(false);
+    toast.close(toastSyncRef.current);
+  }, [addTaskIDB, authUsername, deleteTaskIDB, getAllTasksIDB, toast]);
 
   const addTask = useCallback(
     async (task) => {
@@ -432,47 +294,104 @@ export default function TasksProvider({ children }) {
       let taskId = `GO-${new Date().getTime()}-${Math.floor(
         Math.random() * 1000
       )}`;
+      let username = authUsername ?? GUEST_USERNAME;
+      let synced = false;
 
-      if (authUsername) {
-        const data = {
-          username: authUsername,
-          task_name: task.description,
-          target_cycle: task.estCycle,
-        };
-
+      if (navigator.onLine) {
         try {
-          const { task_id } = await addTaskServer(data);
+          const respData = await addTaskServer({
+            username,
+            task_name: task.description,
+            target_cycle: task.estCycle,
+          });
+
+          const { task_id } = respData;
           taskId = task_id;
-        } catch (error) {
-          if (navigator.onLine) {
-            toast({
-              title: "Error adding task",
-              description: error.message,
-              status: "error",
-              duration: 2000,
-              isClosable: true,
-              position: "top-right",
-            });
-            setAdding(false);
-            return;
-          }
+          synced = true;
+        } catch {
+          synced = false;
         }
       }
 
-      const taskIDB = {
+      await addTaskIDB({
         id: taskId,
-        username: authUsername ?? GUEST_USERNAME,
+        username,
+        synced,
+        localDeleted: false,
         ...task,
-      };
-
-      await addTaskIDB(taskIDB);
+      });
 
       setTasks((prev) => [...prev, { id: taskId, ...task }]);
 
       setAdding(false);
-      syncTasks();
     },
-    [addTaskIDB, authUsername, syncTasks, toast]
+    [addTaskIDB, authUsername]
+  );
+
+  const editTask = useCallback(
+    async (task) => {
+      setUpdating(true);
+      let username = authUsername ?? GUEST_USERNAME;
+      let synced = false;
+      if (authUsername && navigator.onLine && !isIdLocal(task.id)) {
+        try {
+          await editTaskServer(task.id, {
+            username,
+            task_name: task.description,
+            target_cycle: task.estCycle,
+            actual_cycle: task.actCycle,
+            complete_status: task.done,
+          });
+          synced = true;
+        } catch {
+          synced = false;
+        }
+      }
+
+      await editTaskIDB({
+        ...task,
+        username,
+        synced,
+        localDeleted: false,
+      });
+
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t.id === task.id) return task;
+          return t;
+        })
+      );
+
+      setUpdating(false);
+    },
+    [authUsername, editTaskIDB]
+  );
+
+  const deleteTask = useCallback(
+    async (id) => {
+      const data = await getTaskIDB(id);
+      if (!data) return;
+      setDeleting(true);
+      let deleted = false;
+
+      if (authUsername && navigator.onLine && !isIdLocal(id)) {
+        try {
+          await deleteTaskServer(id);
+          deleted = true;
+        } catch {
+          deleted = false;
+        }
+      }
+
+      if (deleted) await deleteTaskIDB(id);
+      else await editTaskIDB({ ...data, localDeleted: true });
+
+      setTasks((prev) => prev.filter((task) => task.id !== id));
+      setSelectedTask((prev) => (prev?.id === id ? null : prev));
+
+      setDeleting(false);
+    },
+    [authUsername, deleteTaskIDB, editTaskIDB, getTaskIDB]
   );
 
   const selecTask = useCallback(
@@ -483,120 +402,11 @@ export default function TasksProvider({ children }) {
     [tasks]
   );
 
-  const editTask = useCallback(
-    async (task) => {
-      setUpdating(true);
-      if (authUsername && !checkIsIdLocal(task.id)) {
-        const data = {
-          username: authUsername,
-          task_name: task.description,
-          target_cycle: task.estCycle,
-          actual_cycle: task.actCycle,
-          complete_status: task.done,
-        };
-
-        try {
-          await editTaskServer(task.id, data);
-          await deleteTaskSyncUpdate(task.id);
-        } catch (error) {
-          if (navigator.onLine) {
-            toast({
-              title: "Error updating task",
-              description: error.message,
-              status: "error",
-              duration: 2000,
-              isClosable: true,
-              position: "top-right",
-            });
-            setUpdating(false);
-            return;
-          } else {
-            const syncData = await getTaskSyncUpdate(task.id);
-            if (syncData) await editTaskSyncUpdate(task);
-            else await addTaskSyncUpdate(task);
-          }
-        }
-      }
-
-      await editTaskIDB({ ...task, username: authUsername ?? GUEST_USERNAME });
-
-      setTasks((prev) =>
-        prev.map((t) => {
-          if (t.id === task.id) {
-            return task;
-          }
-          return t;
-        })
-      );
-      setUpdating(false);
-      syncTasks();
-    },
-    [
-      addTaskSyncUpdate,
-      authUsername,
-      deleteTaskSyncUpdate,
-      editTaskIDB,
-      editTaskSyncUpdate,
-      getTaskSyncUpdate,
-      syncTasks,
-      toast,
-    ]
-  );
-
   const toggleDone = useCallback(
     async (task) => {
       editTask({ ...task, done: !task.done });
     },
     [editTask]
-  );
-
-  const deleteTask = useCallback(
-    async (id) => {
-      setDeleting(true);
-      if (authUsername && !checkIsIdLocal(id)) {
-        try {
-          await deleteTaskServer(id);
-        } catch (error) {
-          if (navigator.onLine) {
-            toast({
-              title: "Error deleting task",
-              description: error.message,
-              status: "error",
-              duration: 2000,
-              isClosable: true,
-              position: "top-right",
-            });
-            setDeleting(false);
-            return;
-          } else {
-            const syncData = await getTaskSyncDelete(id);
-            if (syncData) return;
-            await addTaskSyncDelete({
-              id,
-              username: authUsername,
-            });
-          }
-        }
-      }
-
-      await deleteTaskIDB(id);
-      await deleteTaskSyncUpdate(id);
-
-      setTasks((prev) => prev.filter((task) => task.id !== id));
-      setSelectedTask((prev) => (prev?.id === id ? null : prev));
-
-      setDeleting(false);
-      syncTasks();
-    },
-    [
-      addTaskSyncDelete,
-      authUsername,
-      deleteTaskIDB,
-      deleteTaskSyncUpdate,
-      getTaskSyncDelete,
-      syncTasks,
-      toast,
-    ]
   );
 
   const increaseActCycle = useCallback(async () => {
@@ -625,16 +435,24 @@ export default function TasksProvider({ children }) {
     });
   }, [toast]);
 
+  const handleSync = useCallback(() => {
+    if (!syncing && authUsername && navigator.onLine) syncTasks();
+  }, [authUsername, syncing, syncTasks]);
+
   useEffect(() => {
-    window.addEventListener("online", syncTasks);
+    fetchTasks();
+  }, [fetchTasks]);
+
+  useEffect(() => {
+    window.addEventListener("online", handleSync);
     window.addEventListener("offline", handleOffline);
-    window.addEventListener("focus", syncTasks);
+    window.addEventListener("focus", handleSync);
     return () => {
-      window.removeEventListener("online", syncTasks);
+      window.removeEventListener("online", handleSync);
       window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("focus", syncTasks);
+      window.removeEventListener("focus", handleSync);
     };
-  }, [handleOffline, syncTasks]);
+  }, [handleOffline, handleSync]);
 
   return (
     <TasksContext.Provider
@@ -647,6 +465,11 @@ export default function TasksProvider({ children }) {
         selecTask,
         toggleDone,
         increaseActCycle,
+        fetchTasks,
+        syncAfterSignUp,
+        adding,
+        updating,
+        deleting,
       }}
     >
       {children}
