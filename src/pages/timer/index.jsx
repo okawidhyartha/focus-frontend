@@ -1,15 +1,25 @@
-import { Box, Grid, GridItem, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Grid,
+  GridItem,
+  useBreakpointValue,
+  VStack,
+} from "@chakra-ui/react";
 import HeaderNav from "../../components/HeaderNav";
 import { useTimer } from "../../hooks/useTimer";
 import TimerSection from "../../components/timer/TimerSection";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TasksSection from "../../components/tasks/TasksSection";
 import TaskSelectedSection from "../../components/tasks/TaskSelectedSection";
 import { useSettings } from "../../hooks/useSettings";
+import { AnimatePresence, motion } from "motion/react";
 
 export default function TimerPage() {
   const { selectedOption, playing } = useTimer();
+  const isLargeDevice = useBreakpointValue({ base: false, lg: true });
   const { color, focusBackground, focusBackgroundPreview } = useSettings();
+  const [selectedTaskVisible, setSelectedTaskVisible] = useState(false);
+  const selectedTaskRef = useRef(null);
 
   const [prevFocusBackgroundPreview, setPrevFocusBackgroundPreview] =
     useState(null);
@@ -18,6 +28,17 @@ export default function TimerPage() {
     if (focusBackgroundPreview)
       setPrevFocusBackgroundPreview(focusBackgroundPreview);
   }, [focusBackgroundPreview]);
+
+  useEffect(() => {
+    if (selectedTaskRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => setSelectedTaskVisible(entry.isIntersecting),
+        { threshold: [0] }
+      );
+
+      observer.observe(selectedTaskRef.current);
+    }
+  }, [selectedTaskRef]);
 
   return (
     <Box
@@ -79,11 +100,32 @@ export default function TimerPage() {
           rowGap={"40px"}
         >
           <GridItem width="100%">
-            <TimerSection />
+            <VStack
+              width={"100%"}
+              position={{ base: "unset", lg: "sticky" }}
+              top={{ base: "unset", lg: "20px" }}
+              gap={"30px"}
+            >
+              <AnimatePresence mode="popLayout">
+                {!selectedTaskVisible && isLargeDevice && (
+                  <motion.div
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    style={{ width: "100%" }}
+                  >
+                    <TaskSelectedSection />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <TimerSection />
+            </VStack>
           </GridItem>
           <GridItem width="100%">
-            <VStack width={"100%"}>
-              <TaskSelectedSection />
+            <VStack width={"100%"} gap={["40px", "20px"]}>
+              <Box ref={selectedTaskRef}>
+                <TaskSelectedSection />
+              </Box>
               <TasksSection />
             </VStack>
           </GridItem>

@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { FOCUS_MUSICS } from "../../helpers/constants";
 import { useSettings } from "../../hooks/useSettings";
+import { motion } from "motion/react";
 
 export default function FocusMusicSlider() {
   const toast = useToast();
@@ -67,6 +68,11 @@ export default function FocusMusicSlider() {
 
   return (
     <Box
+      as={motion.div}
+      layout
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 10, opacity: 0 }}
       display="flex"
       flexDirection="column"
       width="100%"
@@ -79,7 +85,6 @@ export default function FocusMusicSlider() {
           modules={[Navigation]}
           spaceBetween={10}
           slidesPerView={"auto"}
-          onSlideChange={() => console.log("slide change")}
           onSwiper={(swiper) => setSwiper(swiper)}
         >
           {FOCUS_MUSICS.map((option) => (
