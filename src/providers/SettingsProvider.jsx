@@ -141,7 +141,7 @@ export default function SettingsProvider({ children }) {
       setTimerDuration({
         focusTime: parseInt(serverSettings.pomodoro),
         shortBreak: parseInt(serverSettings.short),
-        longBreak: parseInt(serverSettings.longBreak),
+        longBreak: parseInt(serverSettings.long),
       });
 
       setFocusMusic(serverSettings.backsound);
