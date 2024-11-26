@@ -1,6 +1,7 @@
 import { Button } from "@chakra-ui/react";
 import { useTimer } from "../../hooks/useTimer";
 import { useSettings } from "../../hooks/useSettings";
+import { motion } from "motion/react";
 
 // eslint-disable-next-line react/prop-types
 export default function ActionButton({ children, ...props }) {
@@ -9,6 +10,8 @@ export default function ActionButton({ children, ...props }) {
 
   return (
     <Button
+      as={motion.button}
+      whileHover={{ scale: 1.05 }}
       textTransform="uppercase"
       fontSize={{ base: "20px", md: "36px" }}
       height={{ base: "40px", md: "59px" }}

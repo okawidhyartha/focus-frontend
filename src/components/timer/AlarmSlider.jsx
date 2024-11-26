@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { ALARMS } from "../../helpers/constants";
 import { useSettings } from "../../hooks/useSettings";
+import { motion } from "motion/react";
 
 export default function AlarmSlider() {
   const toast = useToast();
@@ -61,6 +62,11 @@ export default function AlarmSlider() {
 
   return (
     <Box
+      as={motion.div}
+      layout
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 10, opacity: 0 }}
       display="flex"
       flexDirection="column"
       width="100%"

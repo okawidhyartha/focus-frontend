@@ -2,11 +2,12 @@ import { Box, Heading, VStack } from "@chakra-ui/react";
 import TaskInput from "./TaskInput";
 import { useTasks } from "../../hooks/useTasks";
 import TaskCard from "./TaskCard";
+import { AnimatePresence } from "motion/react";
 
 export default function TasksSection() {
   const { tasks } = useTasks();
   return (
-    <VStack align="flex-start" width={"full"}>
+    <VStack align="flex-start" width={"full"} position="relative" pb={6}>
       <Heading
         as={"h2"}
         color={"white"}
@@ -15,9 +16,11 @@ export default function TasksSection() {
         Tasks
       </Heading>
       <Box height="1px" width="100%" backgroundColor="gray.200" />
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </AnimatePresence>
       <TaskInput />
     </VStack>
   );

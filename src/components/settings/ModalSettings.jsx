@@ -43,13 +43,6 @@ export default function ModalSettings({ isOpen, onClose }) {
   }, [isOpen, timerDuration, focusMusic, alarm]);
 
   const handleSave = useCallback(() => {
-    console.log({
-      focusTime: focusDuration,
-      shortBreak: shortBreakDuration,
-      longBreak: longBreakDuration,
-      alarm: alarmSelected,
-      focusMusic: focusMusicSelected,
-    });
     editSettings({
       focusTime: focusDuration,
       shortBreak: shortBreakDuration,

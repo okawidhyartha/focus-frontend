@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTasks } from "../../hooks/useTasks";
 import { useState } from "react";
 import TaskEdit from "./TaskEdit";
+import { motion } from "motion/react";
 
 export default function TaskCard({ task }) {
   const { description, estCycle, actCycle, id, done } = task;
@@ -17,6 +18,13 @@ export default function TaskCard({ task }) {
 
   return (
     <Box
+      as={motion.div}
+      layout
+      exit={{ opacity: 0, scale: 0 }}
+      initial={{ scale: 0 }}
+      whileInView={{ scale: 1 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       backgroundColor="rgba(255, 255, 255, 0.8)"
       borderRadius="8px"
       padding={{ base: "14px", md: "16px" }}
@@ -30,6 +38,7 @@ export default function TaskCard({ task }) {
       borderLeft={
         isSelected ? "4px solid rgba(0, 0, 0, 0.5)" : "4px solid transparent"
       }
+      gap={4}
     >
       <HStack>
         <Checkbox
@@ -45,7 +54,7 @@ export default function TaskCard({ task }) {
           <Text fontSize={{ base: "14px", md: "16px" }}>{description}</Text>
         )}
       </HStack>
-      <HStack alignSelf={"flex-end"}>
+      <HStack alignSelf={"flex-end"} flexShrink={0}>
         <Text fontSize={{ base: "14px", md: "16px" }}>
           {actCycle} / {estCycle}
         </Text>

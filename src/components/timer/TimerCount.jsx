@@ -4,6 +4,7 @@ import { useTimer } from "../../hooks/useTimer";
 import { useTasks } from "../../hooks/useTasks";
 import { TIMER_OPTIONS } from "../../helpers/constants";
 import { useSettings } from "../../hooks/useSettings";
+import { motion } from "motion/react";
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -89,6 +90,8 @@ export default function TimerCount() {
 
   return (
     <Text
+      as={motion.p}
+      layout
       fontSize={{ base: "50px", md: "128px" }}
       fontWeight="bold"
       letterSpacing="-1.7%"
