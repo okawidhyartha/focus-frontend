@@ -462,7 +462,6 @@ export default function TasksProvider({ children }) {
       ...selectedTask,
       actCycle: selectedTask.actCycle + 1,
     };
-    setSelectedTask(newSelectedTask);
     await editTask(newSelectedTask);
   }, [editTask, selectedTask]);
 

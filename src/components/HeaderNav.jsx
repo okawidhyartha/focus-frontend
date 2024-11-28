@@ -92,7 +92,10 @@ export default function HeaderNav() {
                   {!authUsername && (
                     <Button
                       leftIcon={<IconUser />}
-                      onClick={() => navigate("/sign-up")}
+                      onClick={() => {
+                        navigate("/sign-up");
+                        onCloseMenu();
+                      }}
                       width={"full"}
                     >
                       Sign up
@@ -103,7 +106,10 @@ export default function HeaderNav() {
                     <Button
                       variant={"ghost"}
                       colorScheme="red"
-                      onClick={signOut}
+                      onClick={() => {
+                        signOut();
+                        onCloseMenu();
+                      }}
                       width={"full"}
                     >
                       Logout

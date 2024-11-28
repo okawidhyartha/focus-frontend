@@ -78,6 +78,7 @@ const AddTaskButton = (props) => {
             onClick={() => {
               containerRef.current.scrollIntoView({ behavior: "smooth" });
             }}
+            backdropFilter={"blur(10px)"}
           >
             Add Task
           </Button>
