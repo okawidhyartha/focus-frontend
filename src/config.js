@@ -1,6 +1,6 @@
 export const DBConfig = {
   name: "FocusSphereDB",
-  version: 5,
+  version: 6,
   objectStoresMeta: [
     {
       store: "tasks",
@@ -39,6 +39,11 @@ export const DBConfig = {
         {
           name: "localDeleted",
           keypath: "localDeleted",
+          options: { unique: false },
+        },
+        {
+          name: "createdAt",
+          keypath: "createdAt",
           options: { unique: false },
         },
       ],

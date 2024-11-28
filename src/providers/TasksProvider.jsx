@@ -150,6 +150,8 @@ export default function TasksProvider({ children }) {
             username: authUsername,
             task_name: task.description,
             target_cycle: task.estCycle,
+            actual_cycle: task.actCycle,
+            timestamp: task.createdAt,
           });
 
           await deleteTaskIDB(task.id);
@@ -162,6 +164,7 @@ export default function TasksProvider({ children }) {
             actCycle: task.actCycle,
             done: task.done,
             synced: true,
+            createdAt: respData.createdAt,
           });
         } catch {
           throw new Error("Error syncing tasks: some tasks could not be added");
@@ -180,17 +183,21 @@ export default function TasksProvider({ children }) {
             actCycle: task.actual_cycle,
             done: task.complete_status,
             synced: true,
+            createdAt: task.timestamp,
           });
         }
 
         setTasks(
-          tasksServer.map((task) => ({
-            id: task.id,
-            description: task.task_name,
-            estCycle: task.target_cycle,
-            actCycle: task.actual_cycle,
-            done: task.complete_status,
-          }))
+          tasksServer
+            .map((task) => ({
+              id: task.id,
+              description: task.task_name,
+              estCycle: task.target_cycle,
+              actCycle: task.actual_cycle,
+              done: task.complete_status,
+              createdAt: task.timestamp,
+            }))
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         );
       } catch {
         throw new Error(
@@ -225,13 +232,16 @@ export default function TasksProvider({ children }) {
     );
 
     setTasks(
-      localTasks.map((task) => ({
-        id: task.id,
-        description: task.description,
-        estCycle: task.estCycle,
-        actCycle: task.actCycle,
-        done: task.done,
-      }))
+      localTasks
+        .map((task) => ({
+          id: task.id,
+          description: task.description,
+          estCycle: task.estCycle,
+          actCycle: task.actCycle,
+          done: task.done,
+          createdAt: task.createdAt,
+        }))
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     );
 
     if (authUsername && navigator.onLine) syncTasks();
@@ -257,6 +267,8 @@ export default function TasksProvider({ children }) {
           username: authUsername,
           task_name: task.description,
           target_cycle: task.estCycle,
+          actual_cycle: task.actCycle,
+          timestamp: task.createdAt,
         });
 
         await deleteTaskIDB(task.id);
@@ -275,13 +287,16 @@ export default function TasksProvider({ children }) {
     }
 
     setTasks(
-      localGuestTasks.map((task) => ({
-        id: task.id,
-        description: task.description,
-        estCycle: task.estCycle,
-        actCycle: task.actCycle,
-        done: task.done,
-      }))
+      localGuestTasks
+        .map((task) => ({
+          id: task.id,
+          description: task.description,
+          estCycle: task.estCycle,
+          actCycle: task.actCycle,
+          done: task.done,
+          createdAt: task.createdAt,
+        }))
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     );
 
     setSyncing(false);
@@ -294,6 +309,7 @@ export default function TasksProvider({ children }) {
       let taskId = `GO-${new Date().getTime()}-${Math.floor(
         Math.random() * 1000
       )}`;
+      const createdAt = new Date().toISOString();
       let username = authUsername ?? GUEST_USERNAME;
       let synced = false;
 
@@ -303,6 +319,8 @@ export default function TasksProvider({ children }) {
             username,
             task_name: task.description,
             target_cycle: task.estCycle,
+            actual_cycle: parseInt(task.actCycle),
+            timestamp: createdAt,
           });
 
           const { task_id } = respData;
@@ -318,10 +336,15 @@ export default function TasksProvider({ children }) {
         username,
         synced,
         localDeleted: false,
+        createdAt,
         ...task,
       });
 
-      setTasks((prev) => [...prev, { id: taskId, ...task }]);
+      setTasks((prev) =>
+        [...prev, { id: taskId, createdAt, ...task }].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        )
+      );
 
       setAdding(false);
     },
@@ -356,10 +379,12 @@ export default function TasksProvider({ children }) {
       });
 
       setTasks((prev) =>
-        prev.map((t) => {
-          if (t.id === task.id) return task;
-          return t;
-        })
+        prev
+          .map((t) => {
+            if (t.id === task.id) return task;
+            return t;
+          })
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       );
 
       setUpdating(false);
@@ -386,7 +411,11 @@ export default function TasksProvider({ children }) {
       if (deleted) await deleteTaskIDB(id);
       else await editTaskIDB({ ...data, localDeleted: true });
 
-      setTasks((prev) => prev.filter((task) => task.id !== id));
+      setTasks((prev) =>
+        prev
+          .filter((task) => task.id !== id)
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      );
       setSelectedTask((prev) => (prev?.id === id ? null : prev));
 
       setDeleting(false);
@@ -404,9 +433,18 @@ export default function TasksProvider({ children }) {
 
   const toggleDone = useCallback(
     async (task) => {
+      if (!task.done === true)
+        toast({
+          title: "Good job for completing your task! 🥳",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+          size: "sm",
+        });
       editTask({ ...task, done: !task.done });
     },
-    [editTask]
+    [editTask, toast]
   );
 
   const increaseActCycle = useCallback(async () => {

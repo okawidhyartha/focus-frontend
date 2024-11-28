@@ -42,9 +42,15 @@ export default function TaskCard({ task }) {
     >
       <HStack>
         <Checkbox
+          size={"lg"}
           checked={done}
           defaultChecked={done}
           onChange={() => toggleDone(task)}
+          sx={{
+            ".chakra-checkbox__control": {
+              border: "2px solid rgba(0, 0, 0, 0.5)",
+            },
+          }}
         />
         {done ? (
           <Text fontSize={{ base: "14px", md: "16px" }} as={"s"}>
