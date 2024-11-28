@@ -13,6 +13,7 @@ import TasksSection from "../../components/tasks/TasksSection";
 import TaskSelectedSection from "../../components/tasks/TaskSelectedSection";
 import { useSettings } from "../../hooks/useSettings";
 import { AnimatePresence, motion } from "motion/react";
+import MobileHeaderNav from "../../components/MobileHeaderNav";
 
 export default function TimerPage() {
   const { selectedOption, playing } = useTimer();
@@ -51,6 +52,7 @@ export default function TimerPage() {
       position="relative"
       transition="background-color 1s"
     >
+      <MobileHeaderNav />
       <Box
         position="absolute"
         width="100%"

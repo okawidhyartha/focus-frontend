@@ -11,6 +11,7 @@ export default function TimerProvider({ children }) {
   const [playingAlarm, setPlayingAlarm] = useState(false);
 
   const [timerOrder, setTimerOrder] = useState(0);
+  const [timerVisible, setTimerVisible] = useState(true);
 
   const setNextOption = useCallback(() => {
     let nextOrder = timerOrder + 1;
@@ -38,6 +39,8 @@ export default function TimerProvider({ children }) {
         playingAlarm,
         setPlayingAlarm,
         timerFinish,
+        timerVisible,
+        setTimerVisible,
       }}
     >
       {children}

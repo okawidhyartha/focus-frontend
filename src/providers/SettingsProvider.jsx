@@ -93,6 +93,11 @@ export default function SettingsProvider({ children }) {
   const [updating, setUpdating] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [adding, setAdding] = useState(false);
+  const {
+    isOpen: isOpenMenu,
+    onOpen: onOpenMenu,
+    onClose: onCloseMenu,
+  } = useDisclosure();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -390,6 +395,9 @@ export default function SettingsProvider({ children }) {
         updating,
         syncing,
         adding,
+        isOpenMenu,
+        onOpenMenu,
+        onCloseMenu,
       }}
     >
       {children}

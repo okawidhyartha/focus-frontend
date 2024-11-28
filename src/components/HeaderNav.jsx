@@ -14,7 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   useBreakpointValue,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import LogoApp from "./LogoApp";
@@ -26,9 +25,8 @@ import { useSettings } from "../hooks/useSettings";
 export default function HeaderNav() {
   const navigate = useNavigate();
   const { authUsername, signOut } = useAuth();
-  const { openSettings } = useSettings();
+  const { openSettings, isOpenMenu, onOpenMenu, onCloseMenu } = useSettings();
   const isLargeScreen = useBreakpointValue({ base: false, lg: true });
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <HStack justify="space-between" py="14px" borderBottom="1px solid white">
@@ -72,12 +70,8 @@ export default function HeaderNav() {
 
       {!isLargeScreen && (
         <>
-          <IconButton icon={<IconMenu2 />} onClick={onOpen} />
-          <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            size="xs"
-          >
+          <IconButton icon={<IconMenu2 />} onClick={onOpenMenu} />
+          <Modal isOpen={isOpenMenu} onClose={onCloseMenu} size="xs">
             <ModalOverlay />
             <ModalContent>
               <ModalHeader textAlign={"center"}>{authUsername}</ModalHeader>
@@ -87,7 +81,10 @@ export default function HeaderNav() {
                 <VStack spacing="10px" mt={authUsername ? 0 : "10px"}>
                   <Button
                     leftIcon={<IconSettings />}
-                    onClick={openSettings}
+                    onClick={() => {
+                      openSettings();
+                      onCloseMenu();
+                    }}
                     width={"full"}
                   >
                     Setting

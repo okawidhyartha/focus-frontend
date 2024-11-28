@@ -1,4 +1,11 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import PropTypes from "prop-types";
 import { API_URL, GUEST_USERNAME } from "../helpers/constants";
 import { useAuth } from "../hooks/useAuth";
@@ -84,7 +91,7 @@ export default function TasksProvider({ children }) {
   const [syncing, setSyncing] = useState(false);
 
   const [tasks, setTasks] = useState([]);
-  const [selectedTask, setSelectedTask] = useState();
+  const [_selectedTask, setSelectedTask] = useState();
   const { authUsername } = useAuth();
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -416,23 +423,20 @@ export default function TasksProvider({ children }) {
           .filter((task) => task.id !== id)
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       );
-      setSelectedTask((prev) => (prev?.id === id ? null : prev));
+      setSelectedTask((prev) => (prev === id ? null : prev));
 
       setDeleting(false);
     },
     [authUsername, deleteTaskIDB, editTaskIDB, getTaskIDB]
   );
 
-  const selecTask = useCallback(
-    (id) => {
-      const task = tasks.find((task) => task.id === id);
-      setSelectedTask(task);
-    },
-    [tasks]
-  );
+  const selecTask = useCallback((id) => {
+    setSelectedTask(id);
+  }, []);
 
   const toggleDone = useCallback(
     async (task) => {
+      console.log("task", task);
       if (!task.done === true)
         toast({
           title: "Good job for completing your task! 🥳",
@@ -445,6 +449,11 @@ export default function TasksProvider({ children }) {
       editTask({ ...task, done: !task.done });
     },
     [editTask, toast]
+  );
+
+  const selectedTask = useMemo(
+    () => tasks.find((task) => task.id === _selectedTask),
+    [tasks, _selectedTask]
   );
 
   const increaseActCycle = useCallback(async () => {

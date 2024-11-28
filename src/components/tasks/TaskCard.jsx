@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, HStack, Text } from "@chakra-ui/react";
+import { Box, Button, Checkbox, HStack, Spinner, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useTasks } from "../../hooks/useTasks";
 import { useState } from "react";
@@ -9,12 +9,19 @@ export default function TaskCard({ task }) {
   const { description, estCycle, actCycle, id, done } = task;
   const { selecTask, selectedTask, toggleDone } = useTasks();
   const [showEdit, setShowEdit] = useState(false);
+  const [doneUpdating, setDoneUpdating] = useState(false);
 
   const isSelected = selectedTask?.id === id;
 
   if (showEdit) {
     return <TaskEdit task={task} onCancel={() => setShowEdit(false)} />;
   }
+
+  const handleCheckClick = async () => {
+    setDoneUpdating(true);
+    await toggleDone(task);
+    setDoneUpdating(false);
+  };
 
   return (
     <Box
@@ -30,7 +37,7 @@ export default function TaskCard({ task }) {
       padding={{ base: "14px", md: "16px" }}
       width="100%"
       marginBottom="8px"
-      onClick={() => selecTask(id)}
+      onClick={() => selecTask(isSelected ? null : id)}
       display={"flex"}
       flexDirection={"row"}
       alignItems={"center"}
@@ -41,17 +48,28 @@ export default function TaskCard({ task }) {
       gap={4}
     >
       <HStack>
-        <Checkbox
-          size={"lg"}
-          checked={done}
-          defaultChecked={done}
-          onChange={() => toggleDone(task)}
-          sx={{
-            ".chakra-checkbox__control": {
-              border: "2px solid rgba(0, 0, 0, 0.5)",
-            },
-          }}
-        />
+        <Box position={"relative"}>
+          <Checkbox
+            size={"lg"}
+            checked={done}
+            defaultChecked={done}
+            onChange={handleCheckClick}
+            colorScheme="green"
+            sx={{
+              ".chakra-checkbox__control": {
+                border: doneUpdating ? "none" : "2px solid rgba(0, 0, 0, 0.5)",
+              },
+            }}
+          />
+          {doneUpdating && (
+            <Spinner
+              position={"absolute"}
+              top={"2px"}
+              left={"2px"}
+              size={"sm"}
+            />
+          )}
+        </Box>
         {done ? (
           <Text fontSize={{ base: "14px", md: "16px" }} as={"s"}>
             {description}

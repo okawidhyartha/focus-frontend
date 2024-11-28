@@ -27,7 +27,6 @@ const AddTaskButton = (props) => {
     if (containerRef.current) {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          console.log(entry.isIntersecting);
           setVisible(entry.isIntersecting);
         },
         { threshold: [0] }

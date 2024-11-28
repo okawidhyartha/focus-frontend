@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Portal, Text } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTimer } from "../../hooks/useTimer";
 import { useTasks } from "../../hooks/useTasks";
@@ -24,9 +24,30 @@ export default function TimerCount() {
     playing,
     setPlaying,
     setPlayingAlarm,
+    setTimerVisible,
   } = useTimer();
 
   const { setColor } = useSettings();
+  const smallTImerContainerRef = useRef(null);
+  const containerRef = useRef(null);
+  const currentTimerDuration = useRef(timerDuration);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setTimerVisible(entry.isIntersecting);
+        },
+        { threshold: [0] }
+      );
+
+      observer.observe(containerRef.current);
+    }
+  }, [containerRef, setTimerVisible]);
+
+  useEffect(() => {
+    smallTImerContainerRef.current = document.getElementById("smallTimer");
+  }, [smallTImerContainerRef]);
 
   const [timeSeconds, setTimeSeconds] = useState(
     timerDuration[selectedOption] * 60
@@ -80,24 +101,34 @@ export default function TimerCount() {
   }, [playing, startTimer]);
 
   useEffect(() => {
+    currentTimerDuration.current = timerDuration;
+  }, [timerDuration]);
+
+  useEffect(() => {
     const optionData = TIMER_OPTIONS.find(
       (option) => option.value === selectedOption
     );
     setColor(optionData.color);
     setPlaying(false);
-    setTimeSeconds(timerDuration[selectedOption] * 60);
-  }, [selectedOption, setColor, setPlaying, timerDuration]);
+    setTimeSeconds(currentTimerDuration.current[selectedOption] * 60);
+  }, [selectedOption, setColor, setPlaying]);
 
   return (
-    <Text
-      as={motion.p}
-      layout
-      fontSize={{ base: "50px", md: "128px" }}
-      fontWeight="bold"
-      letterSpacing="-1.7%"
-      color={"white"}
-    >
-      {formatTime(timeSeconds)}
-    </Text>
+    <>
+      <Text
+        as={motion.p}
+        layout
+        fontSize={{ base: "50px", md: "128px" }}
+        fontWeight="bold"
+        letterSpacing="-1.7%"
+        color={"white"}
+        ref={containerRef}
+      >
+        {formatTime(timeSeconds)}
+      </Text>
+      <Portal containerRef={smallTImerContainerRef}>
+        {formatTime(timeSeconds)}
+      </Portal>
+    </>
   );
 }
