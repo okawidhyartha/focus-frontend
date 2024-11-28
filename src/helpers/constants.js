@@ -8,23 +8,23 @@ export const TIMER_OPTIONS = [
   {
     value: "focusTime",
     name: "Focus Time",
-    // minutes: 25,
-    minutes: 0.1,
+    minutes: 25,
     color: "#E9BE61",
+    logo: "/app-logo.svg",
   },
   {
     value: "shortBreak",
     name: "Short Break",
-    // minutes: 5,
-    minutes: 0.1,
+    minutes: 5,
     color: "#70BACA",
+    logo: "/app-logo-blue.svg",
   },
   {
     value: "longBreak",
     name: "Long Break",
-    // minutes: 15,
-    minutes: 0.1,
+    minutes: 15,
     color: "#CA8270",
+    logo: "/app-logo-red.svg",
   },
 ];
 

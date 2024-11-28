@@ -1,10 +1,11 @@
 import { Portal, Text } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTimer } from "../../hooks/useTimer";
 import { useTasks } from "../../hooks/useTasks";
 import { TIMER_OPTIONS } from "../../helpers/constants";
 import { useSettings } from "../../hooks/useSettings";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet";
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -104,17 +105,25 @@ export default function TimerCount() {
     currentTimerDuration.current = timerDuration;
   }, [timerDuration]);
 
+  const optionData = useMemo(
+    () => TIMER_OPTIONS.find((option) => option.value === selectedOption) || {},
+    [selectedOption]
+  );
+
   useEffect(() => {
-    const optionData = TIMER_OPTIONS.find(
-      (option) => option.value === selectedOption
-    );
     setColor(optionData.color);
     setPlaying(false);
     setTimeSeconds(currentTimerDuration.current[selectedOption] * 60);
-  }, [selectedOption, setColor, setPlaying]);
+  }, [optionData, selectedOption, setColor, setPlaying]);
 
   return (
     <>
+      <Helmet>
+        <title>{playing ? formatTime(timeSeconds) : "Focus Sphere"}</title>
+        <link rel="icon" type="image/svg+xml" href={optionData.logo} />
+        <meta name="theme-color" content={optionData.color} />
+      </Helmet>
+
       <Text
         as={motion.p}
         layout
