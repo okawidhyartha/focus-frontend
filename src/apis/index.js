@@ -49,11 +49,13 @@ privateApi.interceptors.response.use(
           refreshToken,
         });
 
+        const { token } = data;
+
         // Save the new access token
-        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("accessToken", token);
 
         // Retry the failed request with the new access token
-        error.config.headers["Authorization"] = `Bearer ${data.accessToken}`;
+        error.config.headers["Authorization"] = `Bearer ${token}`;
         return privateApi.request(error.config);
       } catch (refreshError) {
         console.error("Failed to refresh token:", refreshError);
