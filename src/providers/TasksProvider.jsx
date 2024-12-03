@@ -37,195 +37,132 @@ export default function TasksProvider({ children }) {
 
   const [tasks, setTasks] = useState([]);
   const [_selectedTask, setSelectedTask] = useState();
-  const { authUsername } = useAuth();
+  const { authUsername, afterSignUp } = useAuth();
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  const syncTasks = useCallback(async () => {
-    setSyncing(true);
-    toastSyncRef.current = toast({
-      title: "Syncing tasks...",
-      status: "loading",
-      isClosable: false,
-      position: "top-right",
-    });
-
-    try {
-      const localTasks = (await getAllTasksIDB()).filter(
-        (task) => task.username === authUsername
-      );
-
-      const tasksToDelete = localTasks.filter(
-        (task) => task.localDeleted && !isIdLocal(task.id)
-      );
-
-      for (const task of tasksToDelete) {
-        try {
-          await deleteTaskServer(task.id);
-          await deleteTaskIDB(task.id);
-        } catch {
-          throw new Error(
-            "Error syncing tasks: some tasks could not be deleted"
-          );
-        }
-      }
-
-      const tasksToUpdate = localTasks.filter(
-        (task) => !task.synced && !isIdLocal(task.id)
-      );
-
-      for (const task of tasksToUpdate) {
-        try {
-          await editTaskServer(task.id, {
-            username: authUsername,
-            task_name: task.description,
-            target_cycle: task.estCycle,
-            actual_cycle: task.actCycle,
-            complete_status: task.done,
-          });
-          await editTaskIDB({ ...task, username: authUsername, synced: true });
-        } catch {
-          throw new Error(
-            "Error syncing tasks: some tasks could not be updated"
-          );
-        }
-      }
-
-      const tasksToAdd = localTasks.filter(
-        (task) => !task.synced && isIdLocal(task.id)
-      );
-
-      for (const task of tasksToAdd) {
-        try {
-          const respData = await addTaskServer({
-            username: authUsername,
-            task_name: task.description,
-            target_cycle: task.estCycle,
-            actual_cycle: task.actCycle,
-            timestamp: task.createdAt,
-          });
-
-          await deleteTaskIDB(task.id);
-
-          await addTaskIDB({
-            id: respData.task_id,
-            username: authUsername,
-            description: task.description,
-            estCycle: task.estCycle,
-            actCycle: task.actCycle,
-            done: task.done,
-            synced: true,
-            createdAt: respData.createdAt,
-          });
-        } catch {
-          throw new Error("Error syncing tasks: some tasks could not be added");
-        }
-      }
+  const syncTasks = useCallback(
+    async (username) => {
+      setSyncing(true);
+      toastSyncRef.current = toast({
+        title: "Syncing tasks...",
+        status: "loading",
+        isClosable: false,
+        position: "top-right",
+      });
 
       try {
-        const tasksServer = await fetchTasksServer(authUsername);
+        const localTasks = (await getAllTasksIDB()).filter(
+          (task) => task.username === username
+        );
 
-        for (const task of tasksServer) {
-          await editTaskIDB({
-            id: task.id,
-            username: authUsername,
-            description: task.task_name,
-            estCycle: task.target_cycle,
-            actCycle: task.actual_cycle,
-            done: task.complete_status,
-            synced: true,
-            createdAt: task.timestamp,
-          });
+        const tasksToDelete = localTasks.filter(
+          (task) => task.localDeleted && !isIdLocal(task.id)
+        );
+
+        for (const task of tasksToDelete) {
+          try {
+            await deleteTaskServer(task.id);
+            await deleteTaskIDB(task.id);
+          } catch {
+            throw new Error(
+              "Error syncing tasks: some tasks could not be deleted"
+            );
+          }
         }
 
-        setTasks(
-          tasksServer
-            .map((task) => ({
+        const tasksToUpdate = localTasks.filter(
+          (task) => !task.synced && !isIdLocal(task.id)
+        );
+
+        for (const task of tasksToUpdate) {
+          try {
+            await editTaskServer(task.id, {
+              username: username,
+              task_name: task.description,
+              target_cycle: task.estCycle,
+              actual_cycle: task.actCycle,
+              complete_status: task.done,
+            });
+            await editTaskIDB({
+              ...task,
+              username: username,
+              synced: true,
+            });
+          } catch {
+            throw new Error(
+              "Error syncing tasks: some tasks could not be updated"
+            );
+          }
+        }
+
+        const tasksToAdd = localTasks.filter(
+          (task) => !task.synced && isIdLocal(task.id)
+        );
+
+        for (const task of tasksToAdd) {
+          try {
+            const respData = await addTaskServer({
+              username: username,
+              task_name: task.description,
+              target_cycle: task.estCycle,
+              actual_cycle: task.actCycle,
+              timestamp: task.createdAt,
+            });
+
+            await deleteTaskIDB(task.id);
+
+            await addTaskIDB({
+              id: respData.task_id,
+              username: username,
+              description: task.description,
+              estCycle: task.estCycle,
+              actCycle: task.actCycle,
+              done: task.done,
+              synced: true,
+              createdAt: respData.createdAt,
+            });
+          } catch {
+            throw new Error(
+              "Error syncing tasks: some tasks could not be added"
+            );
+          }
+        }
+
+        try {
+          const tasksServer = await fetchTasksServer(username);
+
+          for (const task of tasksServer) {
+            await editTaskIDB({
               id: task.id,
+              username: username,
               description: task.task_name,
               estCycle: task.target_cycle,
               actCycle: task.actual_cycle,
               done: task.complete_status,
+              synced: true,
               createdAt: task.timestamp,
-            }))
-            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-        );
-      } catch {
-        throw new Error(
-          "Error syncing tasks: could not fetch tasks from server"
-        );
-      }
-    } catch (error) {
-      toast({
-        title: error.message,
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-    }
+            });
+          }
 
-    setSyncing(false);
-    toast.close(toastSyncRef.current);
-  }, [
-    addTaskIDB,
-    authUsername,
-    deleteTaskIDB,
-    editTaskIDB,
-    getAllTasksIDB,
-    toast,
-  ]);
-
-  const fetchTasks = useCallback(async () => {
-    const username = authUsername ?? GUEST_USERNAME;
-    const localTasks = (await getAllTasksIDB()).filter(
-      (task) => task.username === username
-    );
-
-    setTasks(
-      localTasks
-        .map((task) => ({
-          id: task.id,
-          description: task.description,
-          estCycle: task.estCycle,
-          actCycle: task.actCycle,
-          done: task.done,
-          createdAt: task.createdAt,
-        }))
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-    );
-
-    if (authUsername && navigator.onLine) syncTasks();
-  }, [authUsername, getAllTasksIDB, syncTasks]);
-
-  const syncAfterSignUp = useCallback(async () => {
-    setSyncing(true);
-    toastSyncRef.current = toast({
-      title: "Syncing tasks...",
-      status: "loading",
-      isClosable: false,
-      position: "top-right",
-    });
-
-    const localGuestTasks = (await getAllTasksIDB()).filter(
-      (task) => task.username === GUEST_USERNAME
-    );
-
-    for (const task of localGuestTasks) {
-      try {
-        task.username = authUsername;
-        const resp = await addTaskServer({
-          username: authUsername,
-          task_name: task.description,
-          target_cycle: task.estCycle,
-          actual_cycle: task.actCycle,
-          timestamp: task.createdAt,
-        });
-
-        await deleteTaskIDB(task.id);
-
-        await addTaskIDB({ id: resp.task_id, ...task });
+          setTasks(
+            tasksServer
+              .map((task) => ({
+                id: task.id,
+                description: task.task_name,
+                estCycle: task.target_cycle,
+                actCycle: task.actual_cycle,
+                done: task.complete_status,
+                createdAt: task.timestamp,
+              }))
+              .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+          );
+        } catch {
+          throw new Error(
+            "Error syncing tasks: could not fetch tasks from server"
+          );
+        }
       } catch (error) {
         toast({
           title: error.message,
@@ -234,26 +171,104 @@ export default function TasksProvider({ children }) {
           isClosable: true,
           position: "top-right",
         });
-        break;
       }
-    }
 
-    setTasks(
-      localGuestTasks
-        .map((task) => ({
-          id: task.id,
-          description: task.description,
-          estCycle: task.estCycle,
-          actCycle: task.actCycle,
-          done: task.done,
-          createdAt: task.createdAt,
-        }))
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-    );
+      setSyncing(false);
+      toast.close(toastSyncRef.current);
+    },
+    [addTaskIDB, deleteTaskIDB, editTaskIDB, getAllTasksIDB, toast]
+  );
 
-    setSyncing(false);
-    toast.close(toastSyncRef.current);
-  }, [addTaskIDB, authUsername, deleteTaskIDB, getAllTasksIDB, toast]);
+  const fetchTasks = useCallback(
+    async (username) => {
+      // const username = authUsername ?? GUEST_USERNAME;
+      const localTasks = (await getAllTasksIDB()).filter(
+        (task) => task.username === username
+      );
+
+      setTasks(
+        localTasks
+          .map((task) => ({
+            id: task.id,
+            description: task.description,
+            estCycle: task.estCycle,
+            actCycle: task.actCycle,
+            done: task.done,
+            createdAt: task.createdAt,
+          }))
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      );
+
+      if (username !== GUEST_USERNAME && navigator.onLine) syncTasks(username);
+    },
+    [getAllTasksIDB, syncTasks]
+  );
+
+  const syncAfterSignUp = useCallback(
+    async (username) => {
+      setSyncing(true);
+      toastSyncRef.current = toast({
+        title: "Syncing tasks...",
+        status: "loading",
+        isClosable: false,
+        position: "top-right",
+      });
+
+      const localGuestTasks = (await getAllTasksIDB()).filter(
+        (task) => task.username === GUEST_USERNAME
+      );
+
+      for (const task of localGuestTasks) {
+        try {
+          task.username = username;
+          const resp = await addTaskServer({
+            username: username,
+            task_name: task.description,
+            target_cycle: task.estCycle,
+            actual_cycle: task.actCycle,
+            timestamp: task.createdAt,
+          });
+
+          await deleteTaskIDB(task.id);
+
+          await addTaskIDB({ ...task, id: resp.task_id, synced: true });
+        } catch (error) {
+          toast({
+            title: error.message,
+            status: "error",
+            duration: 2000,
+            isClosable: true,
+            position: "top-right",
+          });
+          break;
+        }
+      }
+
+      setTasks(
+        localGuestTasks
+          .map((task) => ({
+            id: task.id,
+            description: task.description,
+            estCycle: task.estCycle,
+            actCycle: task.actCycle,
+            done: task.done,
+            createdAt: task.createdAt,
+          }))
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      );
+
+      setSyncing(false);
+      toast.close(toastSyncRef.current);
+    },
+    [addTaskIDB, deleteTaskIDB, getAllTasksIDB, toast]
+  );
+
+  useEffect(() => {
+    if (afterSignUp.current) {
+      syncAfterSignUp(authUsername);
+      afterSignUp.current = false;
+    } else fetchTasks(authUsername ?? GUEST_USERNAME);
+  }, [afterSignUp, authUsername, fetchTasks, syncAfterSignUp]);
 
   const addTask = useCallback(
     async (task) => {
@@ -427,12 +442,8 @@ export default function TasksProvider({ children }) {
   }, [toast]);
 
   const handleSync = useCallback(() => {
-    if (!syncing && authUsername && navigator.onLine) syncTasks();
+    if (!syncing && authUsername && navigator.onLine) syncTasks(authUsername);
   }, [authUsername, syncing, syncTasks]);
-
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
 
   useEffect(() => {
     window.addEventListener("online", handleSync);
@@ -456,8 +467,6 @@ export default function TasksProvider({ children }) {
         selecTask,
         toggleDone,
         increaseActCycle,
-        fetchTasks,
-        syncAfterSignUp,
         adding,
         updating,
         deleting,

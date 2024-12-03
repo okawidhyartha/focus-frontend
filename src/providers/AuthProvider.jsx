@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { AUTH_USERNAME_KEY } from "../helpers/constants";
 import { signIn as apiSignIn, signUp as apiSignUp } from "../apis/auth";
@@ -7,6 +7,7 @@ export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
   const [authUsername, setAuthUsername] = useState(null);
+  const afterSignUp = useRef(false);
 
   const loadAuthUsername = useCallback(() => {
     const username = localStorage.getItem(AUTH_USERNAME_KEY);
@@ -43,6 +44,8 @@ export default function AuthProvider({ children }) {
       localStorage.setItem("accessToken", access_token);
       localStorage.setItem("refreshToken", refresh_token);
 
+      afterSignUp.current = true;
+
       saveAuthUsername(username);
     },
     [saveAuthUsername]
@@ -50,6 +53,8 @@ export default function AuthProvider({ children }) {
 
   const signOut = useCallback(() => {
     localStorage.removeItem(AUTH_USERNAME_KEY);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     setAuthUsername(null);
   }, []);
 
@@ -60,6 +65,7 @@ export default function AuthProvider({ children }) {
         signUp,
         signOut,
         authUsername,
+        afterSignUp,
       }}
     >
       {children}

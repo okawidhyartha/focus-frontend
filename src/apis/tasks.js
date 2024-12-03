@@ -2,7 +2,7 @@ import { privateApi, handleApiError } from ".";
 
 export const getTasks = async (username) => {
   try {
-    const resp = await privateApi.get("/task/" + username);
+    const resp = await privateApi.get("/tasks/" + username);
     return resp.data?.data;
   } catch (error) {
     if (error.response?.status === 404) return [];
