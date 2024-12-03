@@ -10,58 +10,17 @@ import PropTypes from "prop-types";
 import ModalSettings from "../components/settings/ModalSettings";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import {
-  API_URL,
   FOCUS_MUSICS,
   GUEST_USERNAME,
   TIMER_OPTIONS,
 } from "../helpers/constants";
 import { useAuth } from "../hooks/useAuth";
 import { useIndexedDB } from "react-indexed-db-hook";
-
-const editSettingsServer = async (username, settings) => {
-  const resp = await fetch(API_URL + "/setting/" + username, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(settings),
-  });
-
-  if (!resp.ok) {
-    if (resp.status === 404) return null;
-    else throw new Error("Something went wrong when updating your settings.");
-  }
-
-  return await resp.json();
-};
-
-const addSettingsServer = async (settings) => {
-  const resp = await fetch(API_URL + "/setting", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(settings),
-  });
-
-  if (!resp.ok) {
-    throw new Error("Something went wrong when adding your settings.");
-  }
-
-  return await resp.json();
-};
-
-const fetchSettingsServer = async (username) => {
-  const resp = await fetch(API_URL + "/setting/" + username);
-
-  if (!resp.ok) {
-    if (resp.status === 404) return null;
-    else throw new Error("Something went wrong when fetching your settings.");
-  }
-
-  const json = await resp.json();
-  return json.data[0];
-};
+import {
+  getSettings as fetchSettingsServer,
+  addSettings as addSettingsServer,
+  editSettings as editSettingsServer,
+} from "../apis/settings";
 
 export const SettingsContext = createContext(null);
 
