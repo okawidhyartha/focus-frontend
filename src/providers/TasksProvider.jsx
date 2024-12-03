@@ -7,75 +7,20 @@ import {
   useState,
 } from "react";
 import PropTypes from "prop-types";
-import { API_URL, GUEST_USERNAME } from "../helpers/constants";
+import { GUEST_USERNAME } from "../helpers/constants";
 import { useAuth } from "../hooks/useAuth";
 import { useIndexedDB } from "react-indexed-db-hook";
 import { useToast } from "@chakra-ui/react";
+import {
+  getTasks as fetchTasksServer,
+  editTask as editTaskServer,
+  deleteTask as deleteTaskServer,
+  addTask as addTaskServer,
+} from "../apis/tasks";
 
 export const TasksContext = createContext(null);
 
 const isIdLocal = (id) => String(id).startsWith("GO-");
-
-const editTaskServer = async (id, task) => {
-  const resp = await fetch(API_URL + "/task/" + id, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  });
-
-  if (!resp.ok && resp.status !== 404)
-    throw new Error(
-      "Something went wrong when updating your task. Please try again."
-    );
-};
-
-const deleteTaskServer = async (id) => {
-  const resp = await fetch(API_URL + "/task/" + id, {
-    method: "DELETE",
-  });
-
-  if (!resp.ok && resp.status !== 404)
-    throw new Error(
-      "Something went wrong when deleting your task. Please try again."
-    );
-};
-
-const addTaskServer = async (task) => {
-  const resp = await fetch(API_URL + "/task", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  });
-
-  if (!resp.ok)
-    throw new Error(
-      "Something went wrong when adding your task. Please try again."
-    );
-
-  const { data } = await resp.json();
-
-  return data;
-};
-
-const fetchTasksServer = async (username) => {
-  const resp = await fetch(API_URL + "/tasks/" + username);
-
-  if (!resp.ok) {
-    if (resp.status === 404) return [];
-    else
-      throw new Error(
-        "Something went wrong when fetching your tasks. Please try again."
-      );
-  }
-
-  const { data } = await resp.json();
-
-  return data;
-};
 
 export default function TasksProvider({ children }) {
   const toast = useToast();

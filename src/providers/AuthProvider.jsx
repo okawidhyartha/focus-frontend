@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { API_URL, AUTH_USERNAME_KEY } from "../helpers/constants";
+import { AUTH_USERNAME_KEY } from "../helpers/constants";
+import { signIn as apiSignIn, signUp as apiSignUp } from "../apis/auth";
 
 export const AuthContext = createContext(null);
 
@@ -23,20 +24,11 @@ export default function AuthProvider({ children }) {
 
   const signIn = useCallback(
     async (username, password) => {
-      const resp = await fetch(API_URL + "/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      const { data } = await apiSignIn(username, password);
+      const { access_token, refresh_token } = data;
 
-      const json = await resp.json();
-
-      if (!resp.ok) throw new Error(json.message);
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
 
       saveAuthUsername(username);
     },
@@ -45,20 +37,11 @@ export default function AuthProvider({ children }) {
 
   const signUp = useCallback(
     async (username, password) => {
-      const resp = await fetch(API_URL + "/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      const { data } = await apiSignUp(username, password);
+      const { access_token, refresh_token } = data;
 
-      const json = await resp.json();
-
-      if (!resp.ok) throw new Error(json.message);
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
 
       saveAuthUsername(username);
     },

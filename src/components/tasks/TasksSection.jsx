@@ -18,7 +18,9 @@ export default function TasksSection() {
       <Box height="1px" width="100%" backgroundColor="gray.200" />
       <AnimatePresence mode="popLayout">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <Box key={task.id} width={"full"}>
+            <TaskCard task={task} />
+          </Box>
         ))}
       </AnimatePresence>
       <TaskInput />
