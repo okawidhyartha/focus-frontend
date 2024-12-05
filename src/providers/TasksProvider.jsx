@@ -33,7 +33,6 @@ export default function TasksProvider({ children }) {
     deleteRecord: deleteTaskIDB,
     getByID: getTaskIDB,
   } = useIndexedDB("tasks");
-  const [syncing, setSyncing] = useState(false);
 
   const [tasks, setTasks] = useState([]);
   const [_selectedTask, setSelectedTask] = useState();
@@ -41,11 +40,15 @@ export default function TasksProvider({ children }) {
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [adding, setAdding] = useState(false);
+  const syncRef = useRef(null);
 
   const syncTasks = useCallback(
     async (username) => {
+      if (syncRef.current) return;
       if (!username) return;
-      setSyncing(true);
+
+      syncRef.current = true;
+
       toastSyncRef.current = toast({
         title: "Syncing tasks...",
         status: "loading",
@@ -174,7 +177,8 @@ export default function TasksProvider({ children }) {
         });
       }
 
-      setSyncing(false);
+      syncRef.current = false;
+
       toast.close(toastSyncRef.current);
     },
     [addTaskIDB, deleteTaskIDB, editTaskIDB, getAllTasksIDB, toast]
@@ -200,15 +204,13 @@ export default function TasksProvider({ children }) {
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       );
 
-      if (!syncing && username !== GUEST_USERNAME && navigator.onLine)
-        syncTasks(username);
+      if (username !== GUEST_USERNAME && navigator.onLine) syncTasks(username);
     },
-    [getAllTasksIDB, syncTasks, syncing]
+    [getAllTasksIDB, syncTasks]
   );
 
   const syncAfterSignUp = useCallback(
     async (username) => {
-      setSyncing(true);
       toastSyncRef.current = toast({
         title: "Syncing tasks...",
         status: "loading",
@@ -259,7 +261,6 @@ export default function TasksProvider({ children }) {
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       );
 
-      setSyncing(false);
       toast.close(toastSyncRef.current);
     },
     [addTaskIDB, deleteTaskIDB, getAllTasksIDB, toast]
@@ -447,8 +448,8 @@ export default function TasksProvider({ children }) {
   }, [toast]);
 
   const handleSync = useCallback(() => {
-    if (!syncing && authUsername && navigator.onLine) syncTasks(authUsername);
-  }, [authUsername, syncing, syncTasks]);
+    if (authUsername && navigator.onLine) syncTasks(authUsername);
+  }, [authUsername, syncTasks]);
 
   useEffect(() => {
     window.addEventListener("online", handleSync);

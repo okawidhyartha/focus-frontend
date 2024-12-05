@@ -50,13 +50,13 @@ export default function SettingsProvider({ children }) {
   const toast = useToast();
   const toastSyncRef = useRef();
   const [updating, setUpdating] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [adding, setAdding] = useState(false);
   const {
     isOpen: isOpenMenu,
     onOpen: onOpenMenu,
     onClose: onCloseMenu,
   } = useDisclosure();
+  const syncRef = useRef(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -83,7 +83,10 @@ export default function SettingsProvider({ children }) {
     if (!authUsername) return;
     const localSettings = await getSettingIDB(authUsername);
     if (!localSettings) return;
-    setSyncing(true);
+    if (syncRef.current) return;
+
+    syncRef.current = true;
+
     toastSyncRef.current = toast({
       title: "Syncing settings...",
       status: "loading",
@@ -163,7 +166,9 @@ export default function SettingsProvider({ children }) {
         throw new Error("Something went wrong when syncing your settings.");
       }
     }
-    setSyncing(false);
+
+    syncRef.current = false;
+
     toast.close(toastSyncRef.current);
   }, [authUsername, editSettingIDB, getSettingIDB, toast]);
 
@@ -310,8 +315,8 @@ export default function SettingsProvider({ children }) {
   );
 
   const handleSync = useCallback(() => {
-    if (!syncing && authUsername && navigator.onLine) syncSettings();
-  }, [syncing, authUsername, syncSettings]);
+    if (authUsername && navigator.onLine) syncSettings();
+  }, [authUsername, syncSettings]);
 
   useEffect(() => {
     fetchSettings();
@@ -352,7 +357,6 @@ export default function SettingsProvider({ children }) {
         updateAlarm,
         updateFocusMusic,
         updating,
-        syncing,
         adding,
         isOpenMenu,
         onOpenMenu,
