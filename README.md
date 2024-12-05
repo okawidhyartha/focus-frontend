@@ -1,8 +1,13 @@
-# React + Vite
+# FocusSphere
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![image](https://github.com/user-attachments/assets/4d1cdd87-d80e-4ea9-a529-2453337d839e)
 
-Currently, two official plugins are available:
+FocusSphere is timer application on the web that helps you to gain more focus by implementing pomodoro technique.
+You can use this web app by visiting this link: https://focus-timer-658ff.web.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+To run this web app locally you can clone this repo then follow these steps:
+1. open the project directory
+2. run this command to install all dependecies that we used ```npm install```
+3. then you can start run locally by running ```npm run dev```
+
+You also need node.js >=18 to run this web app
