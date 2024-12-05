@@ -200,9 +200,10 @@ export default function TasksProvider({ children }) {
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       );
 
-      if (username !== GUEST_USERNAME && navigator.onLine) syncTasks(username);
+      if (!syncing && username !== GUEST_USERNAME && navigator.onLine)
+        syncTasks(username);
     },
-    [getAllTasksIDB, syncTasks]
+    [getAllTasksIDB, syncTasks, syncing]
   );
 
   const syncAfterSignUp = useCallback(
