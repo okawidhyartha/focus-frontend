@@ -22,9 +22,9 @@ export const addTask = async (task) => {
   }
 };
 
-export const editTask = async (task) => {
+export const editTask = async (id, task) => {
   try {
-    const resp = await privateApi.put("/task/" + task.id, task);
+    const resp = await privateApi.put("/task/" + id, task);
     return resp.data?.data;
   } catch (error) {
     if (error.response?.status === 404) return null;
