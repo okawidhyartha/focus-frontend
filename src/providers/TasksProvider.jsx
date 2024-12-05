@@ -377,7 +377,10 @@ export default function TasksProvider({ children }) {
       }
 
       if (deleted) await deleteTaskIDB(id);
-      else await editTaskIDB({ ...data, localDeleted: true });
+      else {
+        if (isIdLocal(id)) await deleteTaskIDB(id);
+        else await editTaskIDB({ ...data, localDeleted: true });
+      }
 
       setTasks((prev) =>
         prev
