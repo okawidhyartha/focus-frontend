@@ -44,6 +44,7 @@ export default function TasksProvider({ children }) {
 
   const syncTasks = useCallback(
     async (username) => {
+      if (!username) return;
       setSyncing(true);
       toastSyncRef.current = toast({
         title: "Syncing tasks...",
@@ -181,7 +182,7 @@ export default function TasksProvider({ children }) {
 
   const fetchTasks = useCallback(
     async (username) => {
-      // const username = authUsername ?? GUEST_USERNAME;
+      if (!username) return;
       const localTasks = (await getAllTasksIDB()).filter(
         (task) => task.username === username
       );

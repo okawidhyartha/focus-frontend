@@ -2,6 +2,8 @@ import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { AUTH_USERNAME_KEY } from "../helpers/constants";
 import { signIn as apiSignIn, signUp as apiSignUp } from "../apis/auth";
+import { jwtDecode } from "jwt-decode";
+import { setupInterceptors } from "../apis";
 
 export const AuthContext = createContext(null);
 
@@ -57,6 +59,25 @@ export default function AuthProvider({ children }) {
     localStorage.removeItem("refreshToken");
     setAuthUsername(null);
   }, []);
+
+  useEffect(() => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) return;
+    const refreshTokenDecoded = jwtDecode(refreshToken);
+    if (refreshTokenDecoded.exp * 1000 < Date.now()) {
+      signOut();
+    } else {
+      const timer = setTimeout(() => {
+        signOut();
+      }, refreshTokenDecoded.exp * 1000 - Date.now());
+
+      return () => clearTimeout(timer);
+    }
+  }, [signOut]);
+
+  useEffect(() => {
+    setupInterceptors(signOut);
+  }, [signOut]);
 
   return (
     <AuthContext.Provider
