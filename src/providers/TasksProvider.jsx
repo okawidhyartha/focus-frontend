@@ -184,7 +184,7 @@ export default function TasksProvider({ children }) {
     async (username) => {
       if (!username) return;
       const localTasks = (await getAllTasksIDB()).filter(
-        (task) => task.username === username
+        (task) => task.username === username && task.localDeleted === false
       );
 
       setTasks(
