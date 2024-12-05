@@ -62,8 +62,9 @@ export const setupInterceptors = (signOut) => {
           const { data } = await publicApi.post("/refresh-token", {
             refreshToken,
           });
+          console.log("🚀 ~ data:", data);
 
-          const { token } = data;
+          const { token } = data?.data || {};
 
           // Save the new access token
           localStorage.setItem("accessToken", token);

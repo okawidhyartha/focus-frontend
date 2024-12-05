@@ -103,7 +103,11 @@ export default function TimerCount() {
 
   useEffect(() => {
     currentTimerDuration.current = timerDuration;
-  }, [timerDuration]);
+
+    if (!playing) {
+      setTimeSeconds(timerDuration[selectedOption] * 60);
+    }
+  }, [playing, selectedOption, timerDuration]);
 
   const optionData = useMemo(
     () => TIMER_OPTIONS.find((option) => option.value === selectedOption) || {},
